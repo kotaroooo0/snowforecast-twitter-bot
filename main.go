@@ -2,42 +2,46 @@ package main
 
 import (
 	"log"
-	"time"
+	"net/http"
 
+	"github.com/ChimeraCoder/anaconda"
+	"github.com/bamzi/jobrunner"
+	"github.com/gin-gonic/gin"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/key"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/text"
 )
 
 func main() {
-	scheduledTweet()
+	api := key.GetTwitterApi()
 
-	// TODO: リプライ待ちの動作に変更
-	time.Sleep(100 * time.Second)
+	jobrunner.Start()
+	jobrunner.Schedule("00 10 * * *", TweetForecast{api, "Hakuba47", "MyokoSuginohara"})
+	jobrunner.Schedule("03 10 * * *", TweetForecast{api, "IshiuchiMaruyama", "TakasuSnowPark"})
+
+	jobrunner.Schedule("00 21 * * *", TweetForecast{api, "Hakuba47", "MyokoSuginohara"})
+	jobrunner.Schedule("03 21 * * *", TweetForecast{api, "IshiuchiMaruyama", "TakasuSnowPark"})
+
+	gin.SetMode(gin.ReleaseMode)
+	r := gin.Default()
+	r.GET("/jobrunner/status", JobJSON)
+	r.Run(":8080")
 }
 
-func scheduledTweet() {
+type TweetForecast struct {
+	Api        *anaconda.TwitterApi
+	SkiResort1 string
+	SkiResort2 string
+}
 
-	// TODO: 開発中はAPIを叩かない
-	// api := key.GetTwitterApi()
+func (t TweetForecast) Run() {
+	text := text.TweetContent(t.SkiResort1, t.SkiResort2)
+	tweet, err := t.Api.PostTweet(text, nil)
+	if err != nil {
+		panic(err)
+	}
+	log.Println(tweet)
+}
 
-	go func() {
-
-		// TODO: 頻度を変更
-		ticker := time.NewTicker(1 * time.Second)
-		defer ticker.Stop()
-
-		for {
-			select {
-			case <-ticker.C:
-				text := text.TweetContent()
-				log.Println(text)
-
-				// TODO: 開発中はAPIを叩かない
-				// tweet, err := api.PostTweet(text, nil)
-				// if err != nil {
-				// 	panic(err)
-				// }
-				// fmt.Print(tweet.Text)
-			}
-		}
-	}()
+func JobJSON(c *gin.Context) {
+	c.JSON(http.StatusOK, jobrunner.StatusJson())
 }
