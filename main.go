@@ -16,10 +16,14 @@ func main() {
 
 	jobrunner.Start()
 	jobrunner.Schedule("00 01 * * *", TweetForecast{api, "Hakuba47", "MyokoSuginohara"})
-	jobrunner.Schedule("03 01 * * *", TweetForecast{api, "IshiuchiMaruyama", "TakasuSnowPark"})
+	jobrunner.Schedule("20 01 * * *", TweetForecast{api, "MarunumaKogen", "IshiuchiMaruyama"})
+	jobrunner.Schedule("40 01 * * *", TweetForecast{api, "TakasuSnowPark", "BiwakoValley"})
+	// jobrunner.Schedule("06 01 * * *", TweetForecast{api, "Niseko", "SapporoKokusai"})
 
-	jobrunner.Schedule("00 12 * * *", TweetForecast{api, "Hakuba47", "MyokoSuginohara"})
-	jobrunner.Schedule("03 12 * * *", TweetForecast{api, "IshiuchiMaruyama", "TakasuSnowPark"})
+	jobrunner.Schedule("30 12 * * *", TweetForecast{api, "Hakuba47", "MyokoSuginohara"})
+	jobrunner.Schedule("00 13 * * *", TweetForecast{api, "MarunumaKogen", "IshiuchiMaruyama"})
+	jobrunner.Schedule("30 13 * * *", TweetForecast{api, "TakasuSnowPark", "BiwakoValley"})
+	// jobrunner.Schedule("36 12 * * *", TweetForecast{api, "Niseko", "SapporoKokusai"})
 
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
