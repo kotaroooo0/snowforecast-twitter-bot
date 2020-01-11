@@ -21,26 +21,30 @@ func NewSnowfallForecast(snowfalls []*Snowfall, rainfalls []*Rainfall, skiResort
 }
 
 type Snowfall struct {
-	DaySnowfall   int
-	NightSnowfall int
+	MorningSnowfall int
+	NoonSnowfall    int
+	NightSnowfall   int
 }
 
-func NewSnowfall(daySnowfall, nightSnowfall int) *Snowfall {
+func NewSnowfall(morningSnowfall, noonSnowfall, nightSnowfall int) *Snowfall {
 	return &Snowfall{
-		DaySnowfall:   daySnowfall,
-		NightSnowfall: nightSnowfall,
+		MorningSnowfall: morningSnowfall,
+		NoonSnowfall:    noonSnowfall,
+		NightSnowfall:   nightSnowfall,
 	}
 }
 
 type Rainfall struct {
-	DayRainfall   int
-	NightRainfall int
+	MorningRainfall int
+	NoonRainfall    int
+	NightRainfall   int
 }
 
-func NewRainfall(dayRainfall, nightRainfall int) *Rainfall {
+func NewRainfall(morningRainfall, noonRainfall, nightRainfall int) *Rainfall {
 	return &Rainfall{
-		DayRainfall:   dayRainfall,
-		NightRainfall: nightRainfall,
+		MorningRainfall: morningRainfall,
+		NoonRainfall:    noonRainfall,
+		NightRainfall:   nightRainfall,
 	}
 }
 
@@ -49,56 +53,68 @@ func NewRainfall(dayRainfall, nightRainfall int) *Rainfall {
 // 2.本日の昼からの予報が見れる時
 // 3.本日の夜からの予報が見れる時
 func GetSnowfallForecastBySkiResort(skiResort string) *SnowfallForecast {
-	doc, err := goquery.NewDocument("https://ja.snow-forecast.com/resorts/" + skiResort + "/6day/mid")
+	doc, err := goquery.NewDocument("https://ja.snow-forecast.com/resorts/" + skiResort + "/6day/top")
 	if err != nil {
 		panic(err)
 	}
 
 	snowfalls := make([]*Snowfall, 0)
 	forecastTableSnow := doc.Find("td.forecast-table-snow__cell")
-	daySnowfall := 0
-	nightSnowfall := 0
 	forecastTableSnow.Each(func(index int, s *goquery.Selection) {
-		snowfall := s.Text()
-		if snowfall == "-" {
-			snowfall = "0"
-		}
-		snowfallInt, err := strconv.Atoi(snowfall)
-		if err != nil {
-			panic(err)
-		}
 		if s.HasClass("day-end") {
-			nightSnowfall = snowfallInt
-			snowfalls = append(snowfalls, NewSnowfall(daySnowfall, nightSnowfall))
-			daySnowfall = 0
-			nightSnowfall = 0
-		} else {
-			daySnowfall += snowfallInt
+			if index == 0 {
+				// 朝と昼の情報が取得できない時
+				nightSnowfall := SelectionToInt(s)
+				snowfalls = append(snowfalls, NewSnowfall(0, 0, nightSnowfall))
+			} else if index == 1 {
+				// 朝の情報が取得できない時
+				noonSnowfall := SelectionToInt(forecastTableSnow.Eq(index - 1))
+				nightSnowfall := SelectionToInt(s)
+				snowfalls = append(snowfalls, NewSnowfall(0, noonSnowfall, nightSnowfall))
+			} else {
+				// 朝昼晩の情報が取得できる時
+				morningSnowfall := SelectionToInt(forecastTableSnow.Eq(index - 2))
+				noonSnowfall := SelectionToInt(forecastTableSnow.Eq(index - 1))
+				nightSnowfall := SelectionToInt(s)
+				snowfalls = append(snowfalls, NewSnowfall(morningSnowfall, noonSnowfall, nightSnowfall))
+			}
 		}
 	})
 
 	rainfalls := make([]*Rainfall, 0)
 	forecastTableRain := doc.Find("td.forecast-table-rain__cell")
-	dayRainfall := 0
-	nightRainfall := 0
 	forecastTableRain.Each(func(index int, s *goquery.Selection) {
-		rainfall := s.Text()
-		if rainfall == "-" {
-			rainfall = "0"
-		}
-		rainfallInt, err := strconv.Atoi(rainfall)
-		if err != nil {
-			panic(err)
-		}
 		if s.HasClass("day-end") {
-			nightRainfall = rainfallInt
-			rainfalls = append(rainfalls, NewRainfall(dayRainfall, nightRainfall))
-			dayRainfall = 0
-			nightRainfall = 0
-		} else {
-			dayRainfall += rainfallInt
+			if index == 0 {
+				// 朝と昼の情報が取得できない時
+				nightRainfall := SelectionToInt(s)
+				rainfalls = append(rainfalls, NewRainfall(0, 0, nightRainfall))
+			} else if index == 1 {
+				// 朝の情報が取得できない時
+				noonRainfall := SelectionToInt(forecastTableRain.Eq(index - 1))
+				nightRainfall := SelectionToInt(s)
+				rainfalls = append(rainfalls, NewRainfall(0, noonRainfall, nightRainfall))
+			} else {
+				// 朝昼晩の情報が取得できる時
+				morningRainfall := SelectionToInt(forecastTableRain.Eq(index - 2))
+				noonRainfall := SelectionToInt(forecastTableRain.Eq(index - 1))
+				nightRainfall := SelectionToInt(s)
+				rainfalls = append(rainfalls, NewRainfall(morningRainfall, noonRainfall, nightRainfall))
+			}
 		}
 	})
 
 	return NewSnowfallForecast(snowfalls, rainfalls, skiResort)
+}
+
+func SelectionToInt(s *goquery.Selection) int {
+	fall := s.Text()
+	if fall == "-" {
+		fall = "0"
+	}
+	fallInt, err := strconv.Atoi(fall)
+	if err != nil {
+		panic(err)
+	}
+	return fallInt
 }
