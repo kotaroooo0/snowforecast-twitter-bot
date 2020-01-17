@@ -30,9 +30,9 @@ func TweetContent(skiResort1, skiResort2 string) string {
 }
 
 func AreaLineString(snowfallForecast *scriping.SnowfallForecast) string {
-	content := strconv.Itoa(snowfallForecast.Snowfalls[0].MorningSnowfall) + "," + AddRainyChar(snowfallForecast.Rainfalls[0].MorningRainfall) + strconv.Itoa(snowfallForecast.Snowfalls[0].NoonSnowfall) + "," + AddRainyChar(snowfallForecast.Rainfalls[0].NoonRainfall) + strconv.Itoa(snowfallForecast.Snowfalls[0].NightSnowfall) + "cm" + AddRainyChar(snowfallForecast.Rainfalls[0].NightRainfall) + " " + "| "
-	content += strconv.Itoa(snowfallForecast.Snowfalls[1].MorningSnowfall) + "," + AddRainyChar(snowfallForecast.Rainfalls[1].MorningRainfall) + strconv.Itoa(snowfallForecast.Snowfalls[1].NoonSnowfall) + "," + AddRainyChar(snowfallForecast.Rainfalls[1].NoonRainfall) + strconv.Itoa(snowfallForecast.Snowfalls[1].NightSnowfall) + "cm" + AddRainyChar(snowfallForecast.Rainfalls[1].NightRainfall) + " " + "| "
-	content += strconv.Itoa(snowfallForecast.Snowfalls[2].MorningSnowfall) + "," + AddRainyChar(snowfallForecast.Rainfalls[2].MorningRainfall) + strconv.Itoa(snowfallForecast.Snowfalls[2].NoonSnowfall) + "," + AddRainyChar(snowfallForecast.Rainfalls[2].NoonRainfall) + strconv.Itoa(snowfallForecast.Snowfalls[2].NightSnowfall) + "cm" + AddRainyChar(snowfallForecast.Rainfalls[2].NightRainfall) + " "
+	content := strconv.Itoa(snowfallForecast.Snowfalls[0].MorningSnowfall) + AddRainyChar(snowfallForecast.Rainfalls[0].MorningRainfall) + ", " + strconv.Itoa(snowfallForecast.Snowfalls[0].NoonSnowfall) + AddRainyChar(snowfallForecast.Rainfalls[0].NoonRainfall) + ", " + strconv.Itoa(snowfallForecast.Snowfalls[0].NightSnowfall) + AddRainyChar(snowfallForecast.Rainfalls[0].NightRainfall) + "cm | "
+	content += strconv.Itoa(snowfallForecast.Snowfalls[1].MorningSnowfall) + AddRainyChar(snowfallForecast.Rainfalls[1].MorningRainfall) + ", " + strconv.Itoa(snowfallForecast.Snowfalls[1].NoonSnowfall) + AddRainyChar(snowfallForecast.Rainfalls[1].NoonRainfall) + ", " + strconv.Itoa(snowfallForecast.Snowfalls[1].NightSnowfall) + AddRainyChar(snowfallForecast.Rainfalls[1].NightRainfall) + "cm | "
+	content += strconv.Itoa(snowfallForecast.Snowfalls[2].MorningSnowfall) + AddRainyChar(snowfallForecast.Rainfalls[2].MorningRainfall) + ", " + strconv.Itoa(snowfallForecast.Snowfalls[2].NoonSnowfall) + AddRainyChar(snowfallForecast.Rainfalls[2].NoonRainfall) + ", " + strconv.Itoa(snowfallForecast.Snowfalls[2].NightSnowfall) + AddRainyChar(snowfallForecast.Rainfalls[2].NightRainfall) + "cm "
 	return content
 }
 
