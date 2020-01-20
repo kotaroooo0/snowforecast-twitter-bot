@@ -28,7 +28,7 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.GET("/jobrunner/status", JobJSON)
-	r.Run(":8080")
+	r.Run(":3000")
 }
 
 type TweetForecast struct {
