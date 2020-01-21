@@ -41,11 +41,8 @@ func main() {
 	r.GET("/jobrunner/status", JobJSON)
 	r.GET("/webhook/twitter", GetWebhookTwitter)
 	r.POST("/webhook/twitter", PostWebhookTwitter)
-	fmt.Println("faslgkhaslgkuhkal;sgh")
 
 	r.Run(":3000")
-	fmt.Println("faslgkhaslgkuhkal;sgh")
-
 }
 
 type TweetForecast struct {
