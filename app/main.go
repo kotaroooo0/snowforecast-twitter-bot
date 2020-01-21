@@ -1,17 +1,27 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/ChimeraCoder/anaconda"
 	"github.com/bamzi/jobrunner"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/key"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/text"
 )
 
+func EnvLoad() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+}
+
 func main() {
+	EnvLoad()
 	api := key.GetTwitterApi()
 
 	jobrunner.Start()
@@ -25,10 +35,17 @@ func main() {
 	jobrunner.Schedule("30 13 * * *", TweetForecast{api, "TakasuSnowPark", "BiwakoValley"})
 	// jobrunner.Schedule("36 12 * * *", TweetForecast{api, "Niseko", "SapporoKokusai"})
 
+	fmt.Println("faslgkhaslgkuhkal;sgh")
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.GET("/jobrunner/status", JobJSON)
+	r.GET("/webhook/twitter", GetWebhookTwitter)
+	r.POST("/webhook/twitter", PostWebhookTwitter)
+	fmt.Println("faslgkhaslgkuhkal;sgh")
+
 	r.Run(":3000")
+	fmt.Println("faslgkhaslgkuhkal;sgh")
+
 }
 
 type TweetForecast struct {
@@ -48,4 +65,23 @@ func (t TweetForecast) Run() {
 
 func JobJSON(c *gin.Context) {
 	c.JSON(http.StatusOK, jobrunner.StatusJson())
+}
+
+// type CRCResponse struct {
+// 	ResponseToken string `json:"response_token"`
+// }
+
+func GetWebhookTwitter(c *gin.Context) {
+	fmt.Println(c.Query("crc_token"))
+	c.JSON(http.StatusOK, gin.H{"response_token": key.CreateCRCToken(c.Query("crc_token"))})
+
+	// responseToken := CRCResponse{ResponseToken: key.CreateCRCToken(c.Request.FormValue("crc_token"))}
+	// c.JSON(200, gin.H{
+	// 	"response_token": key.CreateCRCToken(c.Request.FormValue("crc_token")),
+	// })
+}
+
+func PostWebhookTwitter(c *gin.Context) {
+	c.Header("Content-Type", "text/plain")
+	c.Status(http.StatusOK)
 }
