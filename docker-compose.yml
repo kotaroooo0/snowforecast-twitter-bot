@@ -12,6 +12,22 @@ services:
   nginx:
     build: ./nginx
     ports:
-      - "80:80"
+      - "8000:8000"
     depends_on:
       - "golang"
+  https-portal:
+    image: steveltn/https-portal:1
+    # build: ./https-portal
+    ports:
+      - 80:80
+      - 443:443
+    restart: always
+    environment:
+      # DOMAINS:  '35.202.225.189 -> http://web:8000'
+      DOMAINS:  'localhost -> http://nginx:8000'
+      STAGE: "local"
+      FORCE_RENEW: 'false'
+    volumes:
+      - /data/ssl_certs:/var/lib/https-portal
+    depends_on:
+      - nginx
