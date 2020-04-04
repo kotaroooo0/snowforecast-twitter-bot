@@ -34,8 +34,8 @@ func main() {
 	jobrunner.Schedule("00 13 * * *", TweetForecast{api, "MarunumaKogen", "IshiuchiMaruyama"})
 	jobrunner.Schedule("30 13 * * *", TweetForecast{api, "TakasuSnowPark", "BiwakoValley"})
 	// jobrunner.Schedule("36 12 * * *", TweetForecast{api, "Niseko", "SapporoKokusai"})
+	jobrunner.Schedule("@every 5s", TestJob{})
 
-	fmt.Println("faslgkhaslgkuhkal;sgh")
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.GET("/jobrunner/status", JobJSON)
@@ -43,6 +43,13 @@ func main() {
 	r.POST("/webhook/twitter", PostWebhookTwitter)
 
 	r.Run(":3000")
+}
+
+type TestJob struct {
+}
+
+func (e TestJob) Run() {
+	fmt.Printf("Every 5 sec test\n")
 }
 
 type TweetForecast struct {
