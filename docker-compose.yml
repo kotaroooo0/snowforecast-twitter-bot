@@ -22,8 +22,8 @@ services:
       - 443:443
     restart: always
     environment:
-      DOMAINS:  '34.67.95.248 -> http://nginx:8000'
-      STAGE: "local"
+      DOMAINS:  'www.kotaroooo0.com -> http://nginx:8000'
+      STAGE: "production"
       FORCE_RENEW: 'false'
     volumes:
       - /data/ssl_certs:/var/lib/https-portal
