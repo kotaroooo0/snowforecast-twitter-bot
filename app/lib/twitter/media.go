@@ -47,15 +47,14 @@ func MediaUpload(client *http.Client, imagePath string) (string, error) {
 	}
 	base64 := base64.StdEncoding.EncodeToString(byte)
 
+	// INIT
 	initParams := url.Values{}
 	initParams.Set("command", "INIT")
 	initParams.Set("media_type", "image/png")
 	initParams.Set("media_category", "dm_image")
 	initParams.Set("total_bytes", fmt.Sprint(len(byte)))
 	initParams.Set("shared", "true")
-
-	// INIT
-	initResponse, err := client.Post(postMediaUploadUrl, ContentTypeFormUrlEncode, strings.NewReader(initParams.Endode()))
+	initResponse, err := client.Post(postMediaUploadUrl, ContentTypeFormUrlEncode, strings.NewReader(initParams.Encode()))
 	if err != nil {
 		return "", err
 	}
