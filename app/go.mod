@@ -14,5 +14,6 @@ require (
 	github.com/garyburd/go-oauth v0.0.0-20180319155456-bca2e7f09a17 // indirect
 	github.com/gin-gonic/gin v1.5.0
 	github.com/joho/godotenv v1.3.0
+	github.com/mrjones/oauth v0.0.0-20190623134757-126b35219450
 	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553 // indirect
 )
