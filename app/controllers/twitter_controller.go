@@ -19,7 +19,7 @@ func NewTwitterController(engine *gin.Engine) *TwitterController {
 }
 
 func (c *TwitterController) GetCrcToken() {
-	c.engine.Get("/twitter_webhook", c.getCrcToken)
+	c.engine.GET("/twitter_webhook", c.getCrcToken)
 }
 
 func (c *TwitterController) getCrcToken(ctx *gin.Context) {
