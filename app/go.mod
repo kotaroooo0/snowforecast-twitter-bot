@@ -8,11 +8,12 @@ require (
 	github.com/PuerkitoBio/goquery v1.5.0
 	github.com/azr/backoff v0.0.0-20160115115103-53511d3c7330 // indirect
 	github.com/bamzi/jobrunner v1.0.0
-	github.com/carlescere/scheduler v0.0.0-20170109141437-ee74d2f83d82
+	github.com/carlescere/scheduler v0.0.0-20170109141437-ee74d2f83d82 // indirect
 	github.com/dustin/go-jsonpointer v0.0.0-20160814072949-ba0abeacc3dc // indirect
 	github.com/dustin/gojson v0.0.0-20160307161227-2e71ec9dd5ad // indirect
 	github.com/garyburd/go-oauth v0.0.0-20180319155456-bca2e7f09a17 // indirect
 	github.com/gin-gonic/gin v1.5.0
+	github.com/godslew/ScarlettNova v0.0.0-20180925040748-8609c7aa9e43 // indirect
 	github.com/joho/godotenv v1.3.0
 	github.com/mrjones/oauth v0.0.0-20190623134757-126b35219450
 	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553 // indirect

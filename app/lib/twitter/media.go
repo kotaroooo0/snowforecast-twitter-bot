@@ -14,7 +14,7 @@ import (
 type MediaUploadInitResponse struct {
 	MediaID          int64  `json:"media_id"`
 	MediaIDString    string `json:"media_id_string"`
-	ExpiresAfterSecs int    `json:"expires_afrer_secs"`
+	ExpiresAfterSecs int    `json:"expires_after_secs"`
 	MediaKey         string `json:"media_key"`
 }
 
@@ -47,13 +47,14 @@ func MediaUpload(client *http.Client, imagePath string) (string, error) {
 	}
 	base64 := base64.StdEncoding.EncodeToString(byte)
 
-	// INIT
 	initParams := url.Values{}
 	initParams.Set("command", "INIT")
 	initParams.Set("media_type", "image/png")
 	initParams.Set("media_category", "dm_image")
 	initParams.Set("total_bytes", fmt.Sprint(len(byte)))
 	initParams.Set("shared", "true")
+
+	// INIT
 	initResponse, err := client.Post(postMediaUploadUrl, ContentTypeFormUrlEncode, strings.NewReader(initParams.Encode()))
 	if err != nil {
 		return "", err
@@ -70,6 +71,7 @@ func MediaUpload(client *http.Client, imagePath string) (string, error) {
 		return "", err
 	}
 
+	// APPEND
 	for i := 0; i*chunkSize < len(base64); i++ {
 		begin := i * chunkSize
 		end := (i + 1) * chunkSize
@@ -81,7 +83,7 @@ func MediaUpload(client *http.Client, imagePath string) (string, error) {
 		appendParams.Set("command", "APPEND")
 		appendParams.Set("media_id", resp.MediaIDString)
 		appendParams.Set("media_data", base64[begin:end])
-		appendParams.Set("segment_indez", fmt.Sprint(i))
+		appendParams.Set("segment_index", fmt.Sprint(i))
 		_, err := client.Post(postMediaUploadUrl, ContentTypeFormUrlEncode, strings.NewReader(appendParams.Encode()))
 		if err != nil {
 			return "", err

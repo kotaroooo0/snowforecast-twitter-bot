@@ -1,20 +1,20 @@
 package requests
 
 // GET Request (CRC Check)
-type GetTwitterWebhookRequest struct {
+type GetTwitterWebHookRequest struct {
 	CrcToken string `json:"crc_token" form:"crc_token" binding:"required"`
 }
 
-func NewGetTwitterWebhookRequest() GetTwitterWebhookRequest {
-	return GetTwitterWebhookRequest{}
+func NewGetTwitterWebhookRequest() GetTwitterWebHookRequest {
+	return GetTwitterWebHookRequest{}
 }
 
-func (r *GetTwitterWebhookRequest) Validate() error {
+func (r *GetTwitterWebHookRequest) Validate() error {
 	return nil
 }
 
 // POST Request
-type PostTwitterWebhookRequest struct {
+type PostTwitterWebHookRequest struct {
 	DirectMessageEvents []struct {
 		Type          string `json:"type"`
 		ID            string `json:"id"`
@@ -30,11 +30,11 @@ type PostTwitterWebhookRequest struct {
 	} `json:"direct_message_events"`
 }
 
-func NewPostTwitterWebhookRequest() PostTwitterWebhookRequest {
-	return PostTwitterWebhookRequest{}
+func NewPostTwitterWebhookRequest() PostTwitterWebHookRequest {
+	return PostTwitterWebHookRequest{}
 }
 
-func (r *PostTwitterWebhookRequest) Validate() error {
+func (r *PostTwitterWebHookRequest) Validate() error {
 	return nil
 }
 
@@ -85,13 +85,13 @@ type Ctas []struct {
 }
 
 // POST Request
-type PostTwitterWebhookTestRequest struct {
+type PostTwitterWebHookTestRequest struct {
 	ID      string `json:"id" binding:"required"`
 	Message string `json:"message"`
 }
 
-func NewPostTwitterWebhookTestRequest() PostTwitterWebhookTestRequest {
-	return PostTwitterWebhookTestRequest{}
+func NewPostTwitterWebHookTestRequest() PostTwitterWebHookTestRequest {
+	return PostTwitterWebHookTestRequest{}
 }
 
 type PostDirectMessageTestRequest struct {

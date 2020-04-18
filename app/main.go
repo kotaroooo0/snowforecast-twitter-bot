@@ -32,10 +32,9 @@ func main() {
 
 	twitter := controllers.NewTwitterController(r)
 	twitter.GetCrcToken()
-	twitter.PostWebhook()
-	twitter.PostWebhookTest()
-
-	r.Run(":3000")
+	twitter.PostWebHook()
+	twitter.PostWebHookTest()
+	r.Run(":19810")
 }
 
 type TweetForecast struct {
