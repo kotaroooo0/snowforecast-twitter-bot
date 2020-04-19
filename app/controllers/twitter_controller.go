@@ -27,6 +27,7 @@ func (c *TwitterController) getCrcToken(ctx *gin.Context) {
 	if err := ctx.Bind(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, err)
 	}
+	// TODO: crc_tokenが渡されなかったら返す?
 
 	fmt.Print(req)
 

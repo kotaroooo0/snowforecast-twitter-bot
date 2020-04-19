@@ -24,17 +24,10 @@ const (
 	ContentTypeJson          = "application/json"
 )
 
-var (
-	ck = os.Getenv("CONSUMER_KEY")
-	cs = os.Getenv("CONSUMER_SECRET")
-	at = os.Getenv("ACCESS_TOKEN")
-	as = os.Getenv("ACCESS_TOKEN_SECRET")
-)
-
 func CreateTwitterClient() (*http.Client, error) {
 	c := oauth.NewConsumer(
-		ck,
-		cs,
+		os.Getenv("CONSUMER_KEY"),
+		os.Getenv("CONSUMER_SECRET"),
 		oauth.ServiceProvider{
 			RequestTokenUrl:   "https://api.twitter.com/oauth/request_token",
 			AuthorizeTokenUrl: "https://api.twitter.com/oauth/authorize",
@@ -43,8 +36,8 @@ func CreateTwitterClient() (*http.Client, error) {
 	c.Debug(true)
 
 	t := oauth.AccessToken{
-		Token:  at,
-		Secret: as,
+		Token:  os.Getenv("ACCESS_TOKEN"),
+		Secret: os.Getenv("ACCESS_TOKEN_SECRET"),
 	}
 
 	client, err := c.MakeHttpClient(&t)
@@ -55,7 +48,7 @@ func CreateTwitterClient() (*http.Client, error) {
 }
 
 func CreateCRCToken(crcToken string) string {
-	mac := hmac.New(sha256.New, []byte(cs))
+	mac := hmac.New(sha256.New, []byte(os.Getenv("CONSUMER_SECRET")))
 	mac.Write([]byte(crcToken))
 	return "sha256=" + base64.StdEncoding.EncodeToString(mac.Sum(nil))
 }
