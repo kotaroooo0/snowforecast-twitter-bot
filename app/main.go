@@ -9,7 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/controllers"
-	"github.com/kotaroooo0/snowforecast-twitter-bot/key"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/text"
 )
 
@@ -22,10 +21,10 @@ func EnvLoad() {
 
 func main() {
 	EnvLoad()
-	api := key.GetTwitterApi()
+	// api := key.GetTwitterApi()
 	jobrunner.Start()
-	jobrunner.Schedule("00 01 * * *", TweetForecast{api, "Hakuba47", "TakasuSnowPark"})
-	jobrunner.Schedule("20 01 * * *", TweetForecast{api, "MarunumaKogen", "TashiroKaguraMitsumata"})
+	// jobrunner.Schedule("00 01 * * *", TweetForecast{api, "Hakuba47", "TakasuSnowPark"})
+	// jobrunner.Schedule("20 01 * * *", TweetForecast{api, "MarunumaKogen", "TashiroKaguraMitsumata"})
 	r := gin.Default()
 	r.GET("/jobrunner/status", JobJSON)
 
