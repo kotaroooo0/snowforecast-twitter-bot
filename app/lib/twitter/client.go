@@ -1,27 +1,13 @@
 package twitter
 
 import (
-	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
-	"encoding/json"
 	"net/http"
 	"os"
 
 	"github.com/mrjones/oauth"
-)
-
-const (
-	baseUrl              = "https://api.twitter.com/1.1/"
-	PostDirectMessageUrl = baseUrl + "direct_messages/events/new.json"
-	baseUrlUploader      = "https://upload.twitter.com/1.1/"
-	postMediaUploadUrl   = baseUrlUploader + "media/upload.json"
-	chunkSize            = 1024 * 500
-	RetryMetaData        = "100"
-
-	ContentTypeFormUrlEncode = "application/x-www-form-urlencoded"
-	ContentTypeJson          = "application/json"
 )
 
 func CreateTwitterClient() (*http.Client, error) {
@@ -36,7 +22,7 @@ func CreateTwitterClient() (*http.Client, error) {
 	c.Debug(true)
 
 	t := oauth.AccessToken{
-		Token:  os.Getenv("ACCESS_TOKEN"),
+		Token:  os.Getenv("ACCESS_TOKEN_KEY"),
 		Secret: os.Getenv("ACCESS_TOKEN_SECRET"),
 	}
 
@@ -51,18 +37,4 @@ func CreateCRCToken(crcToken string) string {
 	mac := hmac.New(sha256.New, []byte(os.Getenv("CONSUMER_SECRET")))
 	mac.Write([]byte(crcToken))
 	return "sha256=" + base64.StdEncoding.EncodeToString(mac.Sum(nil))
-}
-
-func PostDM(client *http.Client, request interface{}) error {
-	byte, err := json.Marshal(request)
-	if err != nil {
-		return err
-	}
-
-	response, err := client.Post(PostDirectMessageUrl, ContentTypeJson, bytes.NewBuffer(byte))
-	if err != nil {
-		return err
-	}
-	defer response.Body.Close()
-	return nil
 }

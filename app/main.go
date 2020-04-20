@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -33,7 +32,6 @@ func main() {
 	twitter := controllers.NewTwitterController(r)
 	twitter.GetCrcToken()
 	twitter.PostWebhook()
-	twitter.PostWebhookTest()
 
 	r.Run(":3000")
 }
@@ -55,23 +53,4 @@ func (t TweetForecast) Run() {
 
 func JobJSON(c *gin.Context) {
 	c.JSON(http.StatusOK, jobrunner.StatusJson())
-}
-
-// type CRCResponse struct {
-// 	ResponseToken string `json:"response_token"`
-// }
-
-func GetWebhookTwitter(c *gin.Context) {
-	fmt.Println(c.Query("crc_token"))
-	c.JSON(http.StatusOK, gin.H{"response_token": key.CreateCRCToken(c.Query("crc_token"))})
-
-	// responseToken := CRCResponse{ResponseToken: key.CreateCRCToken(c.Request.FormValue("crc_token"))}
-	// c.JSON(200, gin.H{
-	// 	"response_token": key.CreateCRCToken(c.Request.FormValue("crc_token")),
-	// })
-}
-
-func PostWebhookTwitter(c *gin.Context) {
-	c.Header("Content-Type", "text/plain")
-	c.Status(http.StatusOK)
 }
