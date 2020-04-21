@@ -3,7 +3,7 @@ package text
 import (
 	"strconv"
 
-	"github.com/kotaroooo0/snowforecast-twitter-bot/scriping"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/scriping"
 )
 
 func TweetContent(skiResort1, skiResort2 string) string {

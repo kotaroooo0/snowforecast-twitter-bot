@@ -11,8 +11,6 @@ deps:
 ## Run tests
 .PHONY: test
 test: deps
-	go test -v key/key_test.go
-	go test -v text/text_test.go
 	go test -v ./main_test.go
 
 ## Show help
