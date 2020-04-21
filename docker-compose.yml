@@ -1,0 +1,31 @@
+version: "3"
+
+services:
+  golang:
+    tty: true
+    build: ./app
+    volumes:
+      - ./app:/go/src/github.com/kotaroooo0/snowfall-bot/app
+    ports:
+      - "3000"
+    command: bash -c "cd app && go get -v -d && go run main.go"
+  nginx:
+    build: ./nginx
+    ports:
+      - "8000:8000"
+    depends_on:
+      - "golang"
+  https-portal:
+    image: steveltn/https-portal:1
+    ports:
+      - 80:80
+      - 443:443
+    restart: always
+    environment:
+      DOMAINS:  'www.kotaroooo0.com -> http://nginx:8000'
+      STAGE: "production"
+      FORCE_RENEW: 'false'
+    volumes:
+      - /data/ssl_certs:/var/lib/https-portal
+    depends_on:
+      - nginx

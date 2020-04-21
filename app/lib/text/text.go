@@ -3,19 +3,20 @@ package text
 import (
 	"strconv"
 
-	"github.com/kotaroooo0/snowforecast-twitter-bot/scriping"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/scriping"
 )
 
 func TweetContent(skiResort1, skiResort2 string) string {
 	toLabel := map[string]string{
-		"Niseko":           "ニセコ",
-		"SapporoKokusai":   "札幌国際",
-		"Hakuba47":         "白馬47",
-		"MyokoSuginohara":  "赤倉",
-		"IshiuchiMaruyama": "石打丸山",
-		"MarunumaKogen":    "丸沼高原",
-		"TakasuSnowPark":   "高鷲",
-		"BiwakoValley":     "琵琶湖バレイ",
+		"Niseko":                 "ニセコ",
+		"SapporoKokusai":         "札幌国際",
+		"Hakuba47":               "白馬47",
+		"MyokoSuginohara":        "赤倉",
+		"TashiroKaguraMitsumata": "かぐら",
+		"IshiuchiMaruyama":       "石打丸山",
+		"MarunumaKogen":          "丸沼高原",
+		"TakasuSnowPark":         "高鷲",
+		"BiwakoValley":           "琵琶湖バレイ",
 	}
 
 	data1 := scriping.GetSnowfallForecastBySkiResort(skiResort1)
