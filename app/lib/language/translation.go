@@ -70,10 +70,6 @@ func charHebonByIndex(str string, index int) CharHebon {
 		char = utfstr.Slice(index, index+1)
 		hebon = hebonMap[char]
 	}
-	// 1文字もヒットしないとき
-	// if hebon == "" {
-	// 	hebon = char
-	// }
 	return CharHebon{Char: char, Hebon: hebon}
 }
 
@@ -133,9 +129,7 @@ func ToHebon(str string) string {
 		}
 
 		lastHebon = ch.Hebon
-		// lastChar := ch.Char
 		i += utf8.RuneCountInString(ch.Char)
-
 		if i >= utf8.RuneCountInString(str) {
 			break
 		}
