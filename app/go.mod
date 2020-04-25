@@ -14,5 +14,6 @@ require (
 	github.com/gin-gonic/gin v1.5.0
 	github.com/joho/godotenv v1.3.0
 	github.com/robfig/cron/v3 v3.0.0
+	golang.org/x/exp v0.0.0-20200331195152-e8c3332aa8e5
 	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553 // indirect
 )
