@@ -1,0 +1,98 @@
+package main
+
+import (
+	"io/ioutil"
+	"net/http"
+	"os"
+	"sync"
+	"unsafe"
+)
+
+func main() {
+	// redisにデータ初期化用のテキストファイル
+	// cat data.txt | redis-cli --pipe でredisにデータを挿入することを想定している
+	file, err := os.Create("data.txt")
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	// スキー場の地域一覧
+	regions := []string{
+		"exotic", "summer", "22-9", "1", "2", "6", "7", "8", "9", "10", "11", "12", "13", "15", "16", "17", "18", "19", "20", "22", "25", "28", "29",
+		"30", "31", "32", "33", "34", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49",
+		"50", "51", "52", "53", "54", "55", "56", "57", "58", "59", "60", "61", "62", "63", "64", "67", "71", "72", "73", "76", "78", "79",
+		"80", "81", "84", "86", "87", "88", "90", "91", "92", "93", "96", "97", "98", "99",
+		"100", "101", "102", "103", "104", "109", "110", "113", "116", "117", "119", "120", "123", "125", "126", "130", "131", "132", "133", "134", "135", "136", "137", "139",
+		"142", "143", "144", "145", "146", "147", "148", "149", "151", "152", "153", "155", "156", "157", "158", "159", "160", "161", "162", "163", "164", "165", "166", "167", "168", "169",
+		"171", "172", "173", "175", "177", "178", "179", "180", "181", "182", "184", "197", "199",
+		"200", "202", "203", "204", "205", "206", "207", "208", "209", "210", "211", "212", "213", "214", "215", "216", "217", "218", "219", "220", "221", "225",
+	}
+
+	// リクエスト先のサーバに負荷がかかりすぎないようにへ並行処理数を30までにする
+	ch := make(chan int, 30)
+	wg := sync.WaitGroup{}
+	for _, r := range regions {
+		ch <- 1
+		wg.Add(1)
+		go func(r string) {
+			// 地域からスキー場を取得するリクエスト
+			stringSlice, err := http.Get("https://ja.snow-forecast.com/resorts/list_by_feature/" + r + "?v=2")
+			if err != nil {
+				panic(err)
+			}
+			// byteからstringへ
+			stringSliceString, err := ioutil.ReadAll(stringSlice.Body)
+			if err != nil {
+				panic(err)
+			}
+			// 配列のstringからparseして[]Snowresortへ
+			snowResorts := parseStringToSnowResorts(*(*string)(unsafe.Pointer(&stringSliceString)))
+			for i := 0; i < len(snowResorts); i++ {
+				// redisへ追加する文を出力
+				file.WriteString("sadd snowresorts-serchword " + snowResorts[i].SearchWord + "\n")
+				file.WriteString("sadd snowresorts-label \"" + snowResorts[i].Label + "\"\n")
+				file.WriteString("set  " + snowResorts[i].SearchWord + " \"" + snowResorts[i].Label + "\"\n")
+			}
+			<-ch
+			wg.Done()
+		}(r)
+	}
+	wg.Wait()
+}
+
+// stringの配列から[]Snowresortを生成する
+// example
+// input: "[[\"\",[[\"HiddenValley2\",\"Hidden Valley Ski\"],[\"Snow-Creek\",\"Snow Creek\"]]]]"
+// output: []SnowResort{
+// 	SnowResort{"HiddenValley2", "Hidden Valley Ski"},
+// 	SnowResort{"Snow-Creek", "Snow Creek"},
+// }
+// TODO: ASTつくってスマートにparseするライブラリつくりたい
+func parseStringToSnowResorts(str string) []SnowResort {
+	isTarget := false
+	word := ""
+	stringSlice := []string{}
+	for i := 0; i < len([]rune(str)); i++ {
+		if string(str[i]) == "\"" {
+			if isTarget && word != "" {
+				stringSlice = append(stringSlice, word)
+			}
+			isTarget = !isTarget
+			word = ""
+		}
+		if isTarget && string(str[i]) != "\"" {
+			word += string(str[i])
+		}
+	}
+	snowResorts := []SnowResort{}
+	for i := 1; i < len(stringSlice); i += 2 {
+		snowResorts = append(snowResorts, SnowResort{stringSlice[i-1], stringSlice[i]})
+	}
+	return snowResorts
+}
+
+type SnowResort struct {
+	SearchWord string
+	Label      string
+}
