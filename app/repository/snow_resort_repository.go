@@ -23,12 +23,25 @@ func New(addr string) (*redis.Client, error) {
 	return client, nil
 }
 
-func (s *SnowResortRepositoryImpl) ListSnowResorts() ([]string, error) {
-	key := "snowresorts-serchword"
-	v := s.Client.SMembers(key)
-	if v.Err() != nil {
-		return nil, v.Err()
+func (s *SnowResortRepositoryImpl) ListSnowResorts(key string) ([]string, error) {
+	result, err := s.Client.SMembers(key).Result()
+	if err != nil {
+		return nil, err
 	}
 
-	return v.Val(), nil
+	return result, nil
+}
+
+func (s *SnowResortRepositoryImpl) FindSnowResort(key string) (SnowResort, error) {
+	result, err := s.Client.HGetAll(key).Result()
+	if err != nil {
+		return SnowResort{}, err
+	}
+
+	return SnowResort{SearchWord: result["search_word"], Label: result["label"]}, nil
+}
+
+type SnowResort struct {
+	SearchWord string
+	Label      string
 }
