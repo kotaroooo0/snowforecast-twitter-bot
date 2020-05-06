@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"github.com/kotaroooo0/snowforecast-twitter-bot/controllers"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/handler"
 )
 
 func EnvLoad() {
@@ -19,11 +19,16 @@ func main() {
 	EnvLoad()
 	// season outしたためストップ
 	// batch.Start()
+
+	// userRepository := repository.NewUserPersistence()
+	// userUseCase := usecase.NewUserUseCase()
+	twitterHandler := handler.TwitterHandlerImpl{}
+	jobHandler := handler.JobHandlerImpl{}
+
 	r := gin.Default()
-	job := controllers.NewJobController(r)
-	job.GetJobStatus()
-	twitter := controllers.NewTwitterController(r)
-	twitter.GetCrcToken()
-	twitter.PostWebhook()
+	r.GET("/twitter_webhook", twitterHandler.HandleTwitterGetCrcToken)
+	r.POST("/twitter_webhook", twitterHandler.HandleTwitterPostWebhook)
+	r.GET("/job_status", jobHandler.HandleGetJobStatus)
+
 	r.Run(":3000")
 }

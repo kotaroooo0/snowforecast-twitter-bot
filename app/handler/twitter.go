@@ -1,4 +1,4 @@
-package controllers
+package handler
 
 import (
 	"net/http"
@@ -10,19 +10,16 @@ import (
 	"github.com/kotaroooo0/snowforecast-twitter-bot/parameters/responses"
 )
 
-type TwitterController struct {
-	engine *gin.Engine
+type TwitterHandler interface {
+	HandleTwitterGetCrcToken(*gin.Context)
+	HandleTwitterPostWebhook(*gin.Context)
 }
 
-func NewTwitterController(engine *gin.Engine) *TwitterController {
-	return &TwitterController{engine}
+type TwitterHandlerImpl struct {
+	// TwitterUseCase usecase.TwitterUseCase
 }
 
-func (c *TwitterController) GetCrcToken() {
-	c.engine.GET("/twitter_webhook", c.getCrcToken)
-}
-
-func (c *TwitterController) getCrcToken(ctx *gin.Context) {
+func (th TwitterHandlerImpl) HandleTwitterGetCrcToken(ctx *gin.Context) {
 	req := requests.NewGetTwitterWebhookRequest()
 	if err := ctx.Bind(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, err)
@@ -33,11 +30,7 @@ func (c *TwitterController) getCrcToken(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
-func (c *TwitterController) PostWebhook() {
-	c.engine.POST("/twitter_webhook", c.postWebhook)
-}
-
-func (c *TwitterController) postWebhook(ctx *gin.Context) {
+func (th TwitterHandlerImpl) HandleTwitterPostWebhook(ctx *gin.Context) {
 	req := requests.NewPostTwitterWebHookRequest()
 	if err := ctx.Bind(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, err)
