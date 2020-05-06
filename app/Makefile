@@ -11,7 +11,7 @@ deps:
 ## Run tests
 .PHONY: test
 test: deps
-	go test -v ./main_test.go
+	go test ./... -v
 
 ## Show help
 .PHONY: help
