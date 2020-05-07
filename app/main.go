@@ -9,6 +9,7 @@ import (
 	"github.com/kotaroooo0/snowforecast-twitter-bot/batch"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/handler"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/twitter"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/usecase"
 )
 
 func envLoad() {
@@ -27,8 +28,8 @@ func setupBatch() {
 
 func setupRouter() *gin.Engine {
 	// userRepository := repository.NewUserPersistence()
-	// userUseCase := usecase.NewUserUseCase()
-	twitterHandler := handler.TwitterHandlerImpl{}
+	twitterUseCase := usecase.TwitterUseCaseImpl{}
+	twitterHandler := handler.TwitterHandlerImpl{TwitterUseCase: twitterUseCase}
 	jobHandler := handler.JobHandlerImpl{}
 
 	r := gin.Default()
