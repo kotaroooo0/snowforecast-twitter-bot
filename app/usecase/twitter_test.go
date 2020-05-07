@@ -1,4 +1,4 @@
-package language
+package usecase
 
 import (
 	"fmt"
@@ -49,10 +49,12 @@ func TestKanjiToHiragana(t *testing.T) {
 		{kanji: "妙高杉ノ原", hiragana: "みょうこうすぎのはら"},
 		{kanji: "高鷲スノーパーク", hiragana: "たかすすのーぱーく"},
 		{kanji: "GALA湯沢", hiragana: "GALAゆざわ"},
+		{kanji: "GALA", hiragana: "GALA"},
+		{kanji: "hakuba47", hiragana: "hakuba47"},
 	}
 
 	for _, tt := range cases {
-		act := KanjiToHiragana(tt.kanji, &ApiClientMock{})
+		act := kanjiToHiragana(tt.kanji, &ApiClientMock{})
 		if act != tt.hiragana {
 			t.Error(fmt.Sprintf("%s is not %s", act, tt.kanji))
 		}
@@ -98,7 +100,7 @@ func TestToHebon(t *testing.T) {
 		{hiragana: "GALAゆざわ", hebon: "GALAYUZAWA"},
 	}
 	for _, tt := range cases {
-		act := ToHebon(tt.hiragana)
+		act := toHebon(tt.hiragana)
 		if act != tt.hebon {
 			t.Error(fmt.Sprintf("%s is not %s", act, tt.hebon))
 		}

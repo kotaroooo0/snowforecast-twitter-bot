@@ -9,7 +9,7 @@ import (
 	"sync"
 	"unsafe"
 
-	"github.com/kotaroooo0/snowforecast-twitter-bot/repository"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/domain"
 )
 
 func main() {
@@ -75,7 +75,7 @@ func main() {
 // 	SnowResort{"Snow-Creek", "Snow Creek"},
 // }
 // TODO: ASTつくってスマートにparseするライブラリつくりたい
-func parseStringToSnowResorts(str string) []repository.SnowResort {
+func parseStringToSnowResorts(str string) []domain.SnowResort {
 	isTarget := false
 	word := ""
 	stringSlice := []string{}
@@ -91,9 +91,9 @@ func parseStringToSnowResorts(str string) []repository.SnowResort {
 			word += string(str[i])
 		}
 	}
-	snowResorts := []repository.SnowResort{}
+	snowResorts := []domain.SnowResort{}
 	for i := 1; i < len(stringSlice); i += 2 {
-		snowResorts = append(snowResorts, repository.SnowResort{
+		snowResorts = append(snowResorts, domain.SnowResort{
 			SearchWord: stringSlice[i-1],
 			Label:      stringSlice[i],
 		})

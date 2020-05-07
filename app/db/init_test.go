@@ -4,19 +4,19 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/kotaroooo0/snowforecast-twitter-bot/repository"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/domain"
 )
 
 func TestParseStringToSnowResorts(t *testing.T) {
 	cases := []struct {
 		input  string
-		output []repository.SnowResort
+		output []domain.SnowResort
 	}{
 		{
 			input: "[[\"\",[[\"HiddenValley2\",\"Hidden Valley Ski\"],[\"Snow-Creek\",\"Snow Creek\"]]]]",
-			output: []repository.SnowResort{
-				repository.SnowResort{"HiddenValley2", "Hidden Valley Ski"},
-				repository.SnowResort{"Snow-Creek", "Snow Creek"},
+			output: []domain.SnowResort{
+				domain.SnowResort{"HiddenValley2", "Hidden Valley Ski"},
+				domain.SnowResort{"Snow-Creek", "Snow Creek"},
 			},
 		},
 	}

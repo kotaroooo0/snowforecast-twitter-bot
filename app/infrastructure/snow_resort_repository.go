@@ -2,12 +2,9 @@ package repository
 
 import (
 	"github.com/go-redis/redis/v7"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/domain"
 	"github.com/pkg/errors"
 )
-
-type SnowResortRepository interface {
-	ListSnowResorts(offset, limit int) ([]string, error)
-}
 
 type SnowResortRepositoryImpl struct {
 	Client *redis.Client
@@ -23,6 +20,7 @@ func New(addr string) (*redis.Client, error) {
 	return client, nil
 }
 
+// TODO: DomainModelを返すように修正
 func (s *SnowResortRepositoryImpl) ListSnowResorts(key string) ([]string, error) {
 	result, err := s.Client.SMembers(key).Result()
 	if err != nil {
@@ -32,16 +30,11 @@ func (s *SnowResortRepositoryImpl) ListSnowResorts(key string) ([]string, error)
 	return result, nil
 }
 
-func (s *SnowResortRepositoryImpl) FindSnowResort(key string) (SnowResort, error) {
+func (s *SnowResortRepositoryImpl) FindSnowResort(key string) (domain.SnowResort, error) {
 	result, err := s.Client.HGetAll(key).Result()
 	if err != nil {
-		return SnowResort{}, err
+		return domain.SnowResort{}, err
 	}
 
-	return SnowResort{SearchWord: result["search_word"], Label: result["label"]}, nil
-}
-
-type SnowResort struct {
-	SearchWord string
-	Label      string
+	return domain.SnowResort{SearchWord: result["search_word"], Label: result["label"]}, nil
 }
