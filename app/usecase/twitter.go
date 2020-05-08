@@ -49,12 +49,17 @@ func (tu TwitterUseCaseImpl) PostAutoReplyResponse(req PostTwitterWebhookRequest
 	if len(req.TweetCreateEvents) < 1 || req.UserID == req.TweetCreateEvents[0].User.IDStr {
 		return PostTwitterWebhookResponse{}
 	}
+
+	// TODO: Redisにキャッシュしてある結果がある場合それを返す
+
 	// リプライを取得
 	replyText := req.TweetCreateEvents[0].Text
-	// 漢字をひらがなに変換
-	replyText = kanjiToHiragana(replyText, yahoo.NewYahooApiClient())
-	// ひらがなをアルファベットに変換
+	// 漢字をひらがなに変換(ex:GALA湯沢 -> GALAゆざわ)
+	replyText = kanjiToHiragana(replyText, yahoo.NewYahooApiClient()) // TODO: ClientもDIしたほうがいいかも
+	// ひらがなをアルファベットに変換(ex:GALAゆざわ -> GALAyuzawa)
 	replyText = toHebon(replyText)
+	// 残った大文字を小文字に直す(ex:GALAyuzawa -> galayuzawa)
+	replyText = strings.ToLower(replyText)
 
 	// リプライから全世界のスキー場の中で最も適切なスキー場を求める
 	lowercaseSnowResorts, err := tu.SnowResortRepository.ListSnowResorts("lowercase-snowresorts-searchword")
@@ -86,7 +91,7 @@ func kanjiToHiragana(str string, yahooApiClient yahoo.IYahooApiClient) string {
 	}
 
 	h := ""
-	for _, w := range res.MaResult.WordList {
+	for _, w := range res.MaResult.WordList.Words {
 		h += w.Reading
 	}
 	return h
@@ -99,33 +104,33 @@ type CharHebon struct {
 
 func charHebonByIndex(str string, index int) CharHebon {
 	hebonMap := map[string]string{
-		"あ": "A", "い": "I", "う": "U", "え": "E", "お": "O",
-		"か": "KA", "き": "KI", "く": "KU", "け": "KE", "こ": "KO",
-		"さ": "SA", "し": "SHI", "す": "SU", "せ": "SE", "そ": "SO",
-		"た": "TA", "ち": "CHI", "つ": "TSU", "て": "TE", "と": "TO",
-		"な": "NA", "に": "NI", "ぬ": "NU", "ね": "NE", "の": "NO",
-		"は": "HA", "ひ": "HI", "ふ": "FU", "へ": "HE", "ほ": "HO",
-		"ま": "MA", "み": "MI", "む": "MU", "め": "ME", "も": "MO",
-		"や": "YA", "ゆ": "YU", "よ": "YO",
-		"ら": "RA", "り": "RI", "る": "RU", "れ": "RE", "ろ": "RO",
-		"わ": "WA", "ゐ": "I", "ゑ": "E", "を": "O",
-		"ぁ": "A", "ぃ": "I", "ぅ": "U", "ぇ": "E", "ぉ": "O",
-		"が": "GA", "ぎ": "GI", "ぐ": "GU", "げ": "GE", "ご": "GO",
-		"ざ": "ZA", "じ": "JI", "ず": "ZU", "ぜ": "ZE", "ぞ": "ZO",
-		"だ": "DA", "ぢ": "JI", "づ": "ZU", "で": "DE", "ど": "DO",
-		"ば": "BA", "び": "BI", "ぶ": "BU", "べ": "BE", "ぼ": "BO",
-		"ぱ": "PA", "ぴ": "PI", "ぷ": "PU", "ぺ": "PE", "ぽ": "PO",
-		"きゃ": "KYA", "きゅ": "KYU", "きょ": "KYO",
-		"しゃ": "SHA", "しゅ": "SHU", "しょ": "SHO",
-		"ちゃ": "CHA", "ちゅ": "CHU", "ちょ": "CHO", "ちぇ": "CHE",
-		"にゃ": "NYA", "にゅ": "NYU", "にょ": "NYO",
-		"ひゃ": "HYA", "ひゅ": "HYU", "ひょ": "HYO",
-		"みゃ": "MYA", "みゅ": "MYU", "みょ": "MYO",
-		"りゃ": "RYA", "りゅ": "RYU", "りょ": "RYO",
-		"ぎゃ": "GYA", "ぎゅ": "GYU", "ぎょ": "GYO",
-		"じゃ": "JA", "じゅ": "JU", "じょ": "JO",
-		"びゃ": "BYA", "びゅ": "BYU", "びょ": "BYO",
-		"ぴゃ": "PYA", "ぴゅ": "PYU", "ぴょ": "PYO",
+		"あ": "a", "い": "i", "う": "u", "え": "e", "お": "o",
+		"か": "ka", "き": "ki", "く": "ku", "け": "ke", "こ": "ko",
+		"さ": "sa", "し": "shi", "す": "su", "せ": "se", "そ": "so",
+		"た": "ta", "ち": "chi", "つ": "tsu", "て": "te", "と": "to",
+		"な": "na", "に": "ni", "ぬ": "nu", "ね": "ne", "の": "no",
+		"は": "ha", "ひ": "hi", "ふ": "fu", "へ": "he", "ほ": "ho",
+		"ま": "ma", "み": "mi", "む": "mu", "め": "me", "も": "mo",
+		"や": "ya", "ゆ": "yu", "よ": "yo",
+		"ら": "ra", "り": "ri", "る": "ru", "れ": "re", "ろ": "ro",
+		"わ": "wa", "ゐ": "i", "ゑ": "e", "を": "o",
+		"ぁ": "a", "ぃ": "i", "ぅ": "u", "ぇ": "e", "ぉ": "o",
+		"が": "ga", "ぎ": "gi", "ぐ": "gu", "げ": "ge", "ご": "go",
+		"ざ": "za", "じ": "ji", "ず": "zu", "ぜ": "ze", "ぞ": "zo",
+		"だ": "da", "ぢ": "ji", "づ": "zu", "で": "de", "ど": "do",
+		"ば": "ba", "び": "bi", "ぶ": "bu", "べ": "be", "ぼ": "bo",
+		"ぱ": "pa", "ぴ": "pi", "ぷ": "pu", "ぺ": "pe", "ぽ": "po",
+		"きゃ": "kya", "きゅ": "kyu", "きょ": "kyo",
+		"しゃ": "sha", "しゅ": "shu", "しょ": "sho",
+		"ちゃ": "cha", "ちゅ": "chu", "ちょ": "cho", "ちぇ": "che",
+		"にゃ": "nya", "にゅ": "nyu", "にょ": "nyo",
+		"ひゃ": "hya", "ひゅ": "hyu", "ひょ": "hyo",
+		"みゃ": "mya", "みゅ": "myu", "みょ": "myo",
+		"りゃ": "rya", "りゅ": "ryu", "りょ": "ryo",
+		"ぎゃ": "gya", "ぎゅ": "gyu", "ぎょ": "gyo",
+		"じゃ": "ja", "じゅ": "ju", "じょ": "jo",
+		"びゃ": "bya", "びゅ": "byu", "びょ": "byo",
+		"ぴゃ": "pya", "ぴゅ": "pyu", "ぴょ": "pyo",
 	}
 
 	var hebon string
@@ -146,8 +151,8 @@ func charHebonByIndex(str string, index int) CharHebon {
 
 func toHebon(str string) string {
 	isOmitted := map[string]bool{
-		"AA": true, "EE": true, "II": false, // I は連続しても省略しない
-		"OO": true, "OU": true, "UU": true,
+		"aa": true, "ee": true, "ii": false, // i は連続しても省略しない
+		"oo": true, "ou": true, "uu": true,
 	}
 
 	var hebon string
@@ -160,8 +165,8 @@ func toHebon(str string) string {
 			// "っち"
 			nextCh := charHebonByIndex(str, i+1)
 			if nextCh.Hebon != "" {
-				if strings.Index(nextCh.Hebon, "CH") == 0 {
-					ch.Hebon = "T"
+				if strings.Index(nextCh.Hebon, "ch") == 0 {
+					ch.Hebon = "t"
 				} else {
 					ch.Hebon = nextCh.Hebon[0:1]
 				}
@@ -169,10 +174,10 @@ func toHebon(str string) string {
 		} else if ch.Char == "ん" {
 			// B,M,P の前の "ん" は "M" とする。
 			nextCh := charHebonByIndex(str, i+1)
-			if nextCh.Hebon != "" && strings.Index("BMP", nextCh.Hebon[0:1]) != -1 {
-				ch.Hebon = "M"
+			if nextCh.Hebon != "" && strings.Index("bmp", nextCh.Hebon[0:1]) != -1 {
+				ch.Hebon = "m"
 			} else {
-				ch.Hebon = "N"
+				ch.Hebon = "n"
 			}
 		} else if ch.Char == "ー" {
 			// 長音は無視
@@ -248,17 +253,19 @@ type GetTwitterWebhookResponse struct {
 }
 
 type PostTwitterWebhookRequest struct {
-	UserID            string `json:"for_user_id" form:"for_user_id" binding:"required"`
-	TweetCreateEvents []struct {
-		TweetID    int64  `json:"id" form:"id" binding:"required"`
-		TweetIDStr string `json:"id_str" form:"id_str" binding:"required"`
-		User       struct {
-			UserID     int64  `json:"id" form:"id" binding:"required"`
-			IDStr      string `json:"id_str" form:"id_str" binding:"required"`
-			ScreenName string `json:"screen_name" form:"screen_name" binding:"required"`
-		} `json:"user" form:"user" binding:"required"`
-		Text string `json:"text" form:"text" binding:"required"`
-	} `json:"tweet_create_events" form:"tweet_create_events" binding:"required"`
+	UserID            string             `json:"for_user_id" form:"for_user_id" binding:"required"`
+	TweetCreateEvents []TweetCreateEvent `json:"tweet_create_events" form:"tweet_create_events" binding:"required"`
+}
+
+type TweetCreateEvent struct {
+	TweetID    int64  `json:"id" form:"id" binding:"required"`
+	TweetIDStr string `json:"id_str" form:"id_str" binding:"required"`
+	User       struct {
+		UserID     int64  `json:"id" form:"id" binding:"required"`
+		IDStr      string `json:"id_str" form:"id_str" binding:"required"`
+		ScreenName string `json:"screen_name" form:"screen_name" binding:"required"`
+	} `json:"user" form:"user" binding:"required"`
+	Text string `json:"text" form:"text" binding:"required"`
 }
 
 type PostTwitterWebhookResponse struct {

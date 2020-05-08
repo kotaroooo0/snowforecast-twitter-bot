@@ -32,6 +32,19 @@ ACCESS_TOKEN_KEY=<your account's access token>
 ACCESS_TOKEN_SECRET=<your account's access secret>
 ```
 
+## Command for Develop
+
+```
+# Hot Reload
+# ref: https://github.com/oxequa/realize
+$ realize start
+
+# Test
+# ref: https://github.com/eaburns/Watch
+# ref: https://github.com/izumin5210/cgt
+Watch -t make test | cgt
+```
+
 ## Author
 
 kotaroooo0

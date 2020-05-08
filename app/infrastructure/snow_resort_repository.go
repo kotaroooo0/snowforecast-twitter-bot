@@ -21,7 +21,7 @@ func New(addr string) (*redis.Client, error) {
 }
 
 // TODO: DomainModelを返すように修正
-func (s *SnowResortRepositoryImpl) ListSnowResorts(key string) ([]string, error) {
+func (s SnowResortRepositoryImpl) ListSnowResorts(key string) ([]string, error) {
 	result, err := s.Client.SMembers(key).Result()
 	if err != nil {
 		return nil, err
@@ -30,7 +30,7 @@ func (s *SnowResortRepositoryImpl) ListSnowResorts(key string) ([]string, error)
 	return result, nil
 }
 
-func (s *SnowResortRepositoryImpl) FindSnowResort(key string) (domain.SnowResort, error) {
+func (s SnowResortRepositoryImpl) FindSnowResort(key string) (domain.SnowResort, error) {
 	result, err := s.Client.HGetAll(key).Result()
 	if err != nil {
 		return domain.SnowResort{}, err

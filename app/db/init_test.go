@@ -15,8 +15,8 @@ func TestParseStringToSnowResorts(t *testing.T) {
 		{
 			input: "[[\"\",[[\"HiddenValley2\",\"Hidden Valley Ski\"],[\"Snow-Creek\",\"Snow Creek\"]]]]",
 			output: []domain.SnowResort{
-				domain.SnowResort{"HiddenValley2", "Hidden Valley Ski"},
-				domain.SnowResort{"Snow-Creek", "Snow Creek"},
+				{"HiddenValley2", "Hidden Valley Ski"},
+				{"Snow-Creek", "Snow Creek"},
 			},
 		},
 	}
