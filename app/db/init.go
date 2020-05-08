@@ -1,11 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 	"sync"
 	"unsafe"
+
+	"github.com/kotaroooo0/snowforecast-twitter-bot/domain"
 )
 
 func main() {
@@ -50,9 +54,11 @@ func main() {
 			snowResorts := parseStringToSnowResorts(*(*string)(unsafe.Pointer(&stringSliceString)))
 			for i := 0; i < len(snowResorts); i++ {
 				// redisへ追加する文を出力
-				file.WriteString("sadd snowresorts-serchword " + snowResorts[i].SearchWord + "\n")
-				file.WriteString("sadd snowresorts-label \"" + snowResorts[i].Label + "\"\n")
-				file.WriteString("set  " + snowResorts[i].SearchWord + " \"" + snowResorts[i].Label + "\"\n")
+				// TODO: 今は小文字にしているだけだが、さらに/や-を取り除くと平等にマッチするかもしれない
+				file.WriteString("sadd lowercase-snowresorts-searchword " + strings.ToLower(snowResorts[i].SearchWord) + "\n")
+				file.WriteString("sadd lowercase-snowresorts-label \"" + strings.ToLower(snowResorts[i].Label) + "\"\n")
+				file.WriteString(fmt.Sprintf("hmset %s search_word %s label \"%s\"\n", strings.ToLower(snowResorts[i].SearchWord), snowResorts[i].SearchWord, snowResorts[i].Label))
+				file.WriteString(fmt.Sprintf("hmset \"%s\" search_word %s label \"%s\"\n", strings.ToLower(snowResorts[i].Label), snowResorts[i].SearchWord, snowResorts[i].Label))
 			}
 			<-ch
 			wg.Done()
@@ -69,7 +75,7 @@ func main() {
 // 	SnowResort{"Snow-Creek", "Snow Creek"},
 // }
 // TODO: ASTつくってスマートにparseするライブラリつくりたい
-func parseStringToSnowResorts(str string) []SnowResort {
+func parseStringToSnowResorts(str string) []domain.SnowResort {
 	isTarget := false
 	word := ""
 	stringSlice := []string{}
@@ -85,14 +91,12 @@ func parseStringToSnowResorts(str string) []SnowResort {
 			word += string(str[i])
 		}
 	}
-	snowResorts := []SnowResort{}
+	snowResorts := []domain.SnowResort{}
 	for i := 1; i < len(stringSlice); i += 2 {
-		snowResorts = append(snowResorts, SnowResort{stringSlice[i-1], stringSlice[i]})
+		snowResorts = append(snowResorts, domain.SnowResort{
+			SearchWord: stringSlice[i-1],
+			Label:      stringSlice[i],
+		})
 	}
 	return snowResorts
-}
-
-type SnowResort struct {
-	SearchWord string
-	Label      string
 }

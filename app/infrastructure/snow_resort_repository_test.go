@@ -28,8 +28,8 @@ func TestListSnowResorts(t *testing.T) {
 		Client: client,
 	}
 
-	client.SAdd("snowresorts-serchword", "TashiroKaguraMitsumata", "Akakura-Kumado", "Hakuba47")
-	actual, err := s.ListSnowResorts()
+	client.SAdd("lowercase-snowresorts-serchword", "TashiroKaguraMitsumata", "Akakura-Kumado", "Hakuba47")
+	actual, err := s.ListSnowResorts("lowercase-snowresorts-serchword")
 	if err != nil {
 		t.Fatalf("unexpected error while ListSnowResorts '%#v'", err)
 	}
