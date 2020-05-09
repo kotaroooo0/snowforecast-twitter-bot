@@ -105,7 +105,7 @@ func TestPostAutoReplyResponse(t *testing.T) {
 			output: PostTwitterWebhookResponse{SnowResortLabel: "Kagura"},
 		},
 		{
-			input:  "高鷲",
+			input:  "高鷲SP",
 			output: PostTwitterWebhookResponse{SnowResortLabel: "Takasu Snow Park"},
 		},
 		{
