@@ -23,6 +23,7 @@ type TwitterUseCase interface {
 type TwitterUseCaseImpl struct {
 	SnowResortService    domain.SnowResortService
 	SnowResortRepository domain.SnowResortRepository
+	YahooApiClient       yahoo.IYahooApiClient
 }
 
 func (tu TwitterUseCaseImpl) NewGetTwitterWebhookRequest() GetTwitterWebhookRequest {
@@ -48,7 +49,11 @@ func (tu TwitterUseCaseImpl) PostAutoReplyResponse(req PostTwitterWebhookRequest
 	if len(req.TweetCreateEvents) < 1 || req.UserID == req.TweetCreateEvents[0].User.IDStr {
 		return PostTwitterWebhookResponse{}
 	}
-
+	tweet := domain.Tweet{
+		ID:             req.TweetCreateEvents[0].TweetIDStr,
+		Text:           req.TweetCreateEvents[0].Text,
+		UserScreenName: req.TweetCreateEvents[0].User.ScreenName,
+	}
 	// TODO: Redisにキャッシュしてある結果がある場合それを返す
 
 	// リプライを取得
@@ -76,7 +81,7 @@ func (tu TwitterUseCaseImpl) PostAutoReplyResponse(req PostTwitterWebhookRequest
 		return PostTwitterWebhookResponse{}
 	}
 
-	skiResort, err := tu.SnowResortService.ReplyForecast(similarSkiResort)
+	skiResort, err := tu.SnowResortService.ReplyForecast(similarSkiResort, tweet)
 	if err != nil {
 		return PostTwitterWebhookResponse{}
 	}
@@ -142,12 +147,12 @@ type PostTwitterWebhookRequest struct {
 type TweetCreateEvent struct {
 	TweetID    int64  `json:"id" form:"id" binding:"required"`
 	TweetIDStr string `json:"id_str" form:"id_str" binding:"required"`
+	Text       string `json:"text" form:"text" binding:"required"`
 	User       struct {
 		UserID     int64  `json:"id" form:"id" binding:"required"`
 		IDStr      string `json:"id_str" form:"id_str" binding:"required"`
 		ScreenName string `json:"screen_name" form:"screen_name" binding:"required"`
 	} `json:"user" form:"user" binding:"required"`
-	Text string `json:"text" form:"text" binding:"required"`
 }
 
 type PostTwitterWebhookResponse struct {

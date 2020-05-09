@@ -1,29 +1,39 @@
 package domain
 
+import (
+	"fmt"
+	"net/url"
+
+	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/twitter"
+)
+
 type SnowResort struct {
 	SearchWord string
 	Label      string
 }
 
+type Tweet struct {
+	ID             string
+	UserScreenName string
+	Text           string
+}
+
 type SnowResortService interface {
-	ReplyForecast(SnowResort) (SnowResort, error)
+	ReplyForecast(SnowResort, Tweet) (SnowResort, error)
 }
 
 type SnowResortServiceImpl struct {
-	// ドメイン層はどこにも依存しない
+	// ドメイン層はどの層にも依存しない
+	TwitterApiClient twitter.ITwitterApiClient
 }
 
-func (ss SnowResortServiceImpl) ReplyForecast(snowResort SnowResort) (SnowResort, error) {
-	// 自動でリプライを返す
-	// api := twitter.GetTwitterApi()
-	// params := url.Values{}
-	// params.Set("in_reply_to_status_id", req.TweetCreateEvents[0].TweetIDStr)
-	// _, err := api.PostTweet("@"+req.TweetCreateEvents[0].User.ScreenName+" Hello World", params)
-	// if err != nil {
-	//      ctx.JSON(http.StatusBadRequest, err)
-	// } else {
-	//      ctx.Status(200)
-	// }
+func (ss SnowResortServiceImpl) ReplyForecast(snowResort SnowResort, tweet Tweet) (SnowResort, error) {
+	params := url.Values{}
+	params.Set("in_reply_to_status_id", tweet.ID)
+	_, err := ss.TwitterApiClient.PostTweet(fmt.Sprintf("@%s %s", tweet.UserScreenName, "content"), params)
+	if err != nil {
+		return SnowResort{}, nil
+	}
 	return SnowResort{}, nil
 }
 

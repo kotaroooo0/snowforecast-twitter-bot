@@ -22,7 +22,7 @@ func before() {
 
 type SnowResortServiceMock struct{}
 
-func (sm SnowResortServiceMock) ReplyForecast(snowResort domain.SnowResort) (domain.SnowResort, error) {
+func (sm SnowResortServiceMock) ReplyForecast(snowResort domain.SnowResort, tweet domain.Tweet) (domain.SnowResort, error) {
 	return snowResort, nil
 }
 
@@ -78,6 +78,7 @@ func TestPostAutoReplyResponse(t *testing.T) {
 	useCaseImpl := TwitterUseCaseImpl{
 		SnowResortService:    SnowResortServiceMock{},
 		SnowResortRepository: SnowResortRepositoryMock{Client: testClient},
+		YahooApiClient:       &ApiClientMock{},
 	}
 
 	cases := []struct {
@@ -163,9 +164,25 @@ func (a *ApiClientMock) GetMorphologicalAnalysis(str string) (yahoo.GetMorpholog
 		{
 			return createGetMorphologicalAnalysisResponse([]string{"たかす", "すのー", "ぱーく"}), nil
 		}
+	case "高鷲SP":
+		{
+			return createGetMorphologicalAnalysisResponse([]string{"たかす", "SP"}), nil
+		}
+	case "今庄":
+		{
+			return createGetMorphologicalAnalysisResponse([]string{"いまじょう"}), nil
+		}
 	case "GALA湯沢":
 		{
 			return createGetMorphologicalAnalysisResponse([]string{"GALA", "ゆざわ"}), nil
+		}
+	case "石打丸山":
+		{
+			return createGetMorphologicalAnalysisResponse([]string{"いしうち", "まるやま"}), nil
+		}
+	case "赤倉観光":
+		{
+			return createGetMorphologicalAnalysisResponse([]string{"あかくら", "かんこう"}), nil
 		}
 	case "hakuba47":
 		{
@@ -174,6 +191,10 @@ func (a *ApiClientMock) GetMorphologicalAnalysis(str string) (yahoo.GetMorpholog
 	case "hakuba 47":
 		{
 			return createGetMorphologicalAnalysisResponse([]string{"hakuba", " ", "47"}), nil
+		}
+	case "ニセコ":
+		{
+			return createGetMorphologicalAnalysisResponse([]string{"にせこ"}), nil
 		}
 	case "myokosuginohara":
 		{
@@ -184,7 +205,7 @@ func (a *ApiClientMock) GetMorphologicalAnalysis(str string) (yahoo.GetMorpholog
 			return createGetMorphologicalAnalysisResponse([]string{"hak", "みょう", "47", "uba", "たか"}), nil
 		}
 	}
-	return yahoo.GetMorphologicalAnalysisResponse{}, nil
+	return createGetMorphologicalAnalysisResponse([]string{str}), nil
 }
 
 func TestToHiragana(t *testing.T) {
