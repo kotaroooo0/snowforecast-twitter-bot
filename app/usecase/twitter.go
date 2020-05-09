@@ -54,7 +54,7 @@ func (tu TwitterUseCaseImpl) PostAutoReplyResponse(req PostTwitterWebhookRequest
 	// リプライを取得
 	replyText := req.TweetCreateEvents[0].Text
 	// 漢字をひらがなに変換(ex:GALA湯沢 -> GALAゆざわ)
-	replyText = kanjiToHiragana(replyText, yahoo.NewYahooApiClient()) // TODO: ClientもDIしたほうがいいかも
+	replyText = toHiragana(replyText, tu.YahooApiClient)
 	// ひらがなをアルファベットに変換(ex:GALAゆざわ -> GALAyuzawa)
 	replyText = jaconv.ToHebon(replyText)
 	// 残った大文字を小文字に直す(ex:GALAyuzawa -> galayuzawa)
@@ -83,7 +83,7 @@ func (tu TwitterUseCaseImpl) PostAutoReplyResponse(req PostTwitterWebhookRequest
 	return PostTwitterWebhookResponse{skiResort.Label}
 }
 
-func kanjiToHiragana(str string, yahooApiClient yahoo.IYahooApiClient) string {
+func toHiragana(str string, yahooApiClient yahoo.IYahooApiClient) string {
 	res, err := yahooApiClient.GetMorphologicalAnalysis(str)
 	if err != nil {
 		panic(err)

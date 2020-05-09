@@ -187,7 +187,7 @@ func (a *ApiClientMock) GetMorphologicalAnalysis(str string) (yahoo.GetMorpholog
 	return yahoo.GetMorphologicalAnalysisResponse{}, nil
 }
 
-func TestKanjiToHiragana(t *testing.T) {
+func TestToHiragana(t *testing.T) {
 	cases := []struct {
 		kanji    string
 		hiragana string
@@ -203,7 +203,7 @@ func TestKanjiToHiragana(t *testing.T) {
 	}
 
 	for _, tt := range cases {
-		act := kanjiToHiragana(tt.kanji, &ApiClientMock{})
+		act := toHiragana(tt.kanji, &ApiClientMock{})
 		if act != tt.hiragana {
 			t.Error(fmt.Sprintf("%s is not %s", act, tt.kanji))
 		}
