@@ -58,6 +58,11 @@ func (tu TwitterUseCaseImpl) PostAutoReplyResponse(req PostTwitterWebhookRequest
 
 	// リプライを取得
 	replyText := req.TweetCreateEvents[0].Text
+	// @snowfall_botを消す
+	replyText = strings.Replace(replyText, "@snowfall_bot ", "", -1)
+	// スペースを消す
+	replyText = strings.Replace(replyText, " ", "", -1)
+	replyText = strings.Replace(replyText, "　", "", -1)
 	// 漢字をひらがなに変換(ex:GALA湯沢 -> GALAゆざわ)
 	replyText = toHiragana(replyText, tu.YahooApiClient)
 	// ひらがなをアルファベットに変換(ex:GALAゆざわ -> GALAyuzawa)
