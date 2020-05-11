@@ -3,11 +3,16 @@
 ## Twitter
 
 - [@snowfall_bot](https://twitter.com/snowfall_bot)
+
   - 毎日主要スキー場の降雪予報をツイートする
+
+    <img width="400" src="https://user-images.githubusercontent.com/31947384/81565326-1ac9bd00-93d4-11ea-8ebf-bb3499d7566c.png">
+
   - リプライに反応して対応したスキー場の降雪予報をリプライする(漢字でもひらがなでもローマ字でも対応)
 
-<img width="300" src="https://user-images.githubusercontent.com/31947384/80201900-d2826f00-865f-11ea-95bb-5e3d475ba5d4.png">
-<img width="300" src="https://user-images.githubusercontent.com/31947384/81562869-7db95500-93d0-11ea-95da-f9da73c63dde.png">
+    <img width="400" src="https://user-images.githubusercontent.com/31947384/81564307-80b54500-93d2-11ea-82c7-ea5a3adc2f46.png">
+
+    <img width="400" src="https://user-images.githubusercontent.com/31947384/81564354-8f036100-93d2-11ea-96a4-235108bbde9e.png">
 
 ## Setup
 
