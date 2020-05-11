@@ -3,12 +3,18 @@ package main
 import (
 	"log"
 
+	"github.com/kotaroooo0/snowforecast-twitter-bot/domain"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/snowforecast"
+
+	repository "github.com/kotaroooo0/snowforecast-twitter-bot/infrastructure"
+
 	"github.com/bamzi/jobrunner"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/batch"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/handler"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/twitter"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/yahoo"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/usecase"
 )
 
@@ -27,8 +33,16 @@ func setupBatch() {
 }
 
 func setupRouter() *gin.Engine {
-	// userRepository := repository.NewUserPersistence()
-	twitterUseCase := usecase.TwitterUseCaseImpl{}
+	twitterApiClient := twitter.NewTwitterApiClient()
+	yahooApiClient := yahoo.NewYahooApiClient()
+	snowforecastApiClient := snowforecast.NewSnowforecastApiClient()
+	redisClient, err := repository.New("localhost:6379")
+	if err != nil {
+		log.Fatal(err)
+	}
+	snowResortRepository := repository.SnowResortRepositoryImpl{Client: redisClient}
+	snowResortService := domain.SnowResortServiceImpl{TwitterApiClient: twitterApiClient, SnowforecastApiClient: snowforecastApiClient}
+	twitterUseCase := usecase.TwitterUseCaseImpl{SnowResortService: snowResortService, SnowResortRepository: snowResortRepository, YahooApiClient: yahooApiClient}
 	twitterHandler := handler.TwitterHandlerImpl{TwitterUseCase: twitterUseCase}
 	jobHandler := handler.JobHandlerImpl{}
 
