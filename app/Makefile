@@ -13,6 +13,11 @@ deps:
 test: deps
 	go test ./... -v
 
+# Watch & run tests
+.PHONY: watchtest
+watchtest:
+	Watch -t make test | cgt
+
 ## Show help
 .PHONY: help
 help:
@@ -27,6 +32,26 @@ build: deps
 .PHONY: run
 run: build
 	./main
+
+# Watch & run app
+.PHONY: realize
+realize:
+	realize start
+
+# Init data
+.PHONY: initdata
+initdata:
+	cat db/data.txt | redis-cli --pipe
+
+# Init test data
+.PHONY: inittestdata
+inittestdata:
+	cat db/data.txt | redis-cli -n 1 --pipe
+
+# Run redis
+.PHONY: redisup
+redisup:
+	redis-server /usr/local/etc/redis.conf
 
 ## Clean binary
 .PHONY: clean
