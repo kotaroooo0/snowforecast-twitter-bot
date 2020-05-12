@@ -3,12 +3,21 @@ version: "3"
 services:
   golang:
     tty: true
-    build: ./app
+    image: "golang:latest"
     volumes:
       - ./app:/go/src/github.com/kotaroooo0/snowfall-bot/app
     ports:
       - "3000"
-    command: bash -c "cd app && go get -v -d && go run main.go"
+    command: >
+      bash -c "cd /go/src/github.com/kotaroooo0/snowfall-bot/app &&
+      go get -v -d &&
+      go run main.go"
+    links:
+      - redis
+  redis:
+    image: "redis:latest"
+    volumes:
+      - ./app/db:/data
   nginx:
     build: ./nginx
     ports:
