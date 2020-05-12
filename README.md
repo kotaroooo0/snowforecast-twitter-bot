@@ -17,18 +17,23 @@
 ## Setup
 
 ```
-$ wget https://dl.google.com/go/go1.13.3.linux-amd64.tar.gz
-$ tar -xvf go1.13.3.linux-amd64.tar.gz
-$ sudo mv go /usr/local
-$ echo 'export GOROOT=/usr/local/go' >> ~/.profile
-$ echo 'export GOPATH=$HOME' >> ~/.profile
-$ echo 'export PATH=$GOPATH/bin:$GOROOT/bin:$PATH'  >> ~/.profile
-
+// Install git
 $ apt-get update
 $ apt-get install git-all
 
-# Get source code, then
-$ go run main.go &
+// Install docker-compose
+$ sudo curl -L "https://github.com/docker/compose/releases/download/1.25.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+$ sudo chmod +x /usr/local/bin/docker-compose
+
+// Clone this repository
+$ git clone https://github.com/kotaroooo0/snowforecast-twitter-bot.git
+$ cd snowforecast-twitter-bot
+
+// Set .env
+$ vi app/.env
+
+// Boot!
+$ docker-compose up -d
 ```
 
 A example of `.env`
