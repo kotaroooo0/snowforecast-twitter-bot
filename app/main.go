@@ -41,8 +41,8 @@ func setupRouter() *gin.Engine {
 		log.Fatal(err)
 	}
 	snowResortRepository := repository.SnowResortRepositoryImpl{Client: redisClient}
-	snowResortService := domain.SnowResortServiceImpl{TwitterApiClient: twitterApiClient, SnowforecastApiClient: snowforecastApiClient}
-	twitterUseCase := usecase.TwitterUseCaseImpl{SnowResortService: snowResortService, SnowResortRepository: snowResortRepository, YahooApiClient: yahooApiClient}
+	snowResortService := domain.SnowResortServiceImpl{SnowResortRepository: snowResortRepository, TwitterApiClient: twitterApiClient, SnowforecastApiClient: snowforecastApiClient, YahooApiClient: yahooApiClient}
+	twitterUseCase := usecase.TwitterUseCaseImpl{SnowResortService: snowResortService}
 	twitterHandler := handler.TwitterHandlerImpl{TwitterUseCase: twitterUseCase}
 	jobHandler := handler.JobHandlerImpl{}
 

@@ -4,8 +4,12 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"strings"
 
+	"github.com/kotaroooo0/gojaconv/jaconv"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/snowforecast"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/yahoo"
+	"github.com/texttheater/golang-levenshtein/levenshtein"
 	"golang.org/x/exp/utf8string"
 
 	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/twitter"
@@ -24,10 +28,13 @@ type Tweet struct {
 
 type SnowResortService interface {
 	ReplyForecast(SnowResort, Tweet) (SnowResort, error)
+	GetSimilarSnowResortFromReply(string) (SnowResort, error)
 }
 
 type SnowResortServiceImpl struct {
 	// ドメイン層はどの層にも依存しない
+	SnowResortRepository  SnowResortRepository
+	YahooApiClient        yahoo.IYahooApiClient
 	TwitterApiClient      twitter.ITwitterApiClient
 	SnowforecastApiClient snowforecast.ISnowforecastApiClient
 }
@@ -44,6 +51,33 @@ func (ss SnowResortServiceImpl) ReplyForecast(snowResort SnowResort, tweet Tweet
 		return SnowResort{}, err
 	}
 	return SnowResort{}, nil
+}
+
+func (ss SnowResortServiceImpl) GetSimilarSnowResortFromReply(reply string) (SnowResort, error) {
+	// @snowfall_botを消す
+	replyText := strings.Replace(reply, "@snowfall_bot ", "", -1)
+	// スペースを消す
+	replyText = strings.Replace(replyText, " ", "", -1)
+	replyText = strings.Replace(replyText, "　", "", -1)
+	// 漢字をひらがなに変換(ex:GALA湯沢 -> GALAゆざわ)
+	replyText = toHiragana(replyText, ss.YahooApiClient)
+	// ひらがなをアルファベットに変換(ex:GALAゆざわ -> GALAyuzawa)
+	replyText = jaconv.ToHebon(replyText)
+	// 残った大文字を小文字に直す(ex:GALAyuzawa -> galayuzawa)
+	replyText = strings.ToLower(replyText)
+
+	lowercaseSnowResorts, err := ss.SnowResortRepository.ListSnowResorts("lowercase-snowresorts-searchword")
+	if err != nil {
+		return SnowResort{}, err
+	}
+	snowResortLabels, err := ss.SnowResortRepository.ListSnowResorts("lowercase-snowresorts-label")
+	if err != nil {
+		return SnowResort{}, err
+	}
+	sources := append(lowercaseSnowResorts, snowResortLabels...)
+	similarSkiResortString := getSimilarSkiResort(replyText, sources)
+
+	return ss.SnowResortRepository.FindSnowResort(similarSkiResortString)
 }
 
 func replyContent(snowResort SnowResort, snowforecastApiClient snowforecast.ISnowforecastApiClient) (string, error) {
@@ -77,6 +111,50 @@ func addRainyChar(rainfall int) string {
 		return "☂️"
 	}
 	return ""
+}
+
+func toHiragana(str string, yahooApiClient yahoo.IYahooApiClient) string {
+	res, err := yahooApiClient.GetMorphologicalAnalysis(str)
+	if err != nil {
+		panic(err)
+	}
+
+	h := ""
+	for _, w := range res.MaResult.WordList.Words {
+		h += w.Reading
+	}
+	return h
+}
+
+func getSimilarSkiResort(target string, skiresorts []string) string {
+	// targetは小文字にしておく
+	target = strings.ToLower(target)
+
+	// レーベンシュタイン距離を計算する際の重みづけ
+	// 削除の際の距離を小さくしている
+	// TODO: 標準化や他の編集距離を考える必要もある、その際に評価をするためにラベル付おじさんにならないといけないかもしれない
+	myOptions := levenshtein.Options{
+		InsCost: 10,
+		DelCost: 1,
+		SubCost: 10,
+		Matches: levenshtein.IdenticalRunes,
+	}
+	distances := make([]int, len(skiresorts))
+	for i := 0; i < len(skiresorts); i++ {
+		distances[i] = levenshtein.DistanceForStrings([]rune(skiresorts[i]), []rune(target), myOptions)
+	}
+
+	// 距離が最小のもののインデックスを取得する
+	minIdx := 0
+	minDistance := 1000000 // 十分大きな数
+	for i := 0; i < len(distances); i++ {
+		if distances[i] <= minDistance {
+			minDistance = distances[i]
+			minIdx = i
+		}
+	}
+
+	return skiresorts[minIdx]
 }
 
 type SnowResortRepository interface {
