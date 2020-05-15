@@ -43,9 +43,12 @@ CONSUMER_KEY=<your twitter app's consumer key>
 CONSUMER_SECRET=<your twitter app's consumer secret>
 ACCESS_TOKEN_KEY=<your account's access token>
 ACCESS_TOKEN_SECRET=<your account's access secret>
+REDIS_HOST=redis
 ```
 
 ## Command for Develop
+
+You can use Makefile.
 
 ```
 # Hot Reload

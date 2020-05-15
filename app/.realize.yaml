@@ -11,7 +11,7 @@ schema:
       method: go build -o .
     run:
       status: true
-      method: ./snowforecast-twitter-bot
+      method: REDIS_HOST=localhost ./snowforecast-twitter-bot
   watcher:
     extensions:
     - go

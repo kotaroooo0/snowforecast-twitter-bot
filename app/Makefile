@@ -11,12 +11,12 @@ deps:
 ## Run tests
 .PHONY: test
 test: deps
-	go test ./... -v
+	REDIS_HOST=localhost go test ./... -v
 
 # Watch & run tests
 .PHONY: watchtest
 watchtest:
-	Watch -t make test | cgt
+	REDIS_HOST=localhost Watch -t make test | cgt
 
 ## Show help
 .PHONY: help
@@ -31,7 +31,7 @@ build: deps
 ## Run binary
 .PHONY: run
 run: build
-	./main
+	REDIS_HOST=localhost ./main
 
 # Watch & run app
 .PHONY: realize

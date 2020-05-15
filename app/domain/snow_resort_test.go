@@ -3,6 +3,7 @@ package domain
 import (
 	"fmt"
 	"log"
+	"os"
 	"testing"
 
 	"github.com/go-redis/redis"
@@ -57,7 +58,7 @@ type SnowResortRepositoryMock struct {
 
 func testClient() (*redis.Client, error) {
 	client := redis.NewClient(&redis.Options{
-		Addr: "redis:6379",
+		Addr: os.Getenv("REDIS_HOST") + ":6379",
 		DB:   1, // 1のDBをテスト用とする
 	})
 	if err := client.Ping().Err(); err != nil {
