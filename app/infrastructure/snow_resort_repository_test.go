@@ -3,6 +3,8 @@ package repository
 import (
 	"testing"
 
+	"github.com/kotaroooo0/snowforecast-twitter-bot/domain"
+
 	"github.com/alicebob/miniredis"
 	"github.com/go-redis/redis/v7"
 	"github.com/google/go-cmp/cmp"
@@ -46,4 +48,49 @@ func TestListSnowResorts(t *testing.T) {
 	if diff := cmp.Diff(actualSet, expectedSet); diff != "" {
 		t.Errorf("Diff: (-got +want)\n%s", diff)
 	}
+}
+
+func TestFindSnowResort(t *testing.T) {
+	client := NewMockRedis(t)
+	s := SnowResortRepositoryImpl{
+		Client: client,
+	}
+	client.HMSet("hakuba47", "search_word", "Hakuba47", "label", "Hakuba 47")
+
+	cases := []struct {
+		input  string
+		output domain.SnowResort
+	}{
+		{
+			input:  "hoge",
+			output: domain.SnowResort{},
+		},
+		{
+			input:  "hakuba47",
+			output: domain.SnowResort{SearchWord: "Hakuba47", Label: "Hakuba 47"},
+		},
+	}
+
+	for _, tt := range cases {
+		act, err := s.FindSnowResort(tt.input)
+		if err != nil {
+			t.Fatalf("unexpected error while TestFindSnowResort '%#v'", err)
+		}
+		if diff := cmp.Diff(act, tt.output); diff != "" {
+			t.Errorf("Diff: (-got +want)\n%s", diff)
+		}
+	}
+
+}
+
+func TestSetSnowResort(t *testing.T) {
+	client := NewMockRedis(t)
+	s := SnowResortRepositoryImpl{
+		Client: client,
+	}
+	err := s.SetSnowResort("47", domain.SnowResort{SearchWord: "Hakuba47", Label: "Hakuba 47"})
+	if err != nil {
+		t.Error(err)
+	}
+
 }

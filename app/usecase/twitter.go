@@ -50,7 +50,6 @@ func (tu TwitterUseCaseImpl) PostAutoReplyResponse(req PostTwitterWebhookRequest
 		Text:           req.TweetCreateEvents[0].Text,
 		UserScreenName: req.TweetCreateEvents[0].User.ScreenName,
 	}
-	// TODO: Redisにキャッシュしてある結果がある場合それを返す
 
 	// リプライを取得
 	replyText := req.TweetCreateEvents[0].Text

@@ -6,6 +6,7 @@ import (
 	"os"
 	"testing"
 
+	// TODO: v7をimportしたほうがよさそう
 	"github.com/go-redis/redis"
 	"github.com/google/go-cmp/cmp"
 	"github.com/joho/godotenv"
@@ -67,6 +68,8 @@ func testClient() (*redis.Client, error) {
 	return client, nil
 }
 
+// TODO: 以下の三つのメソッドはinfra層にほぼ同じ実装があるけどいいんだろうか
+// infra層からimportしようとすると import cycle not allowed になる
 func (s SnowResortRepositoryMock) ListSnowResorts(key string) ([]string, error) {
 	result, err := s.Client.SMembers(key).Result()
 	if err != nil {
@@ -83,6 +86,11 @@ func (s SnowResortRepositoryMock) FindSnowResort(key string) (SnowResort, error)
 	}
 
 	return SnowResort{SearchWord: result["search_word"], Label: result["label"]}, nil
+}
+
+func (s SnowResortRepositoryMock) SetSnowResort(key string, snowResort SnowResort) error {
+	err := s.Client.HMSet(key, map[string]interface{}{"search_word": snowResort.SearchWord, "label": snowResort.Label})
+	return err.Err()
 }
 
 func TestGetSimilarSnowResortFromReply(t *testing.T) {
