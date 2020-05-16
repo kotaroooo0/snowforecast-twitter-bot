@@ -53,6 +53,7 @@ func (ss SnowResortServiceImpl) ReplyForecast(snowResort SnowResort, tweet Tweet
 	return SnowResort{}, nil
 }
 
+// TODO: メソッドが大きすぎるので分割してもいかも
 func (ss SnowResortServiceImpl) GetSimilarSnowResortFromReply(reply string) (SnowResort, error) {
 	// @snowfall_botを消す
 	replyText := strings.Replace(reply, "@snowfall_bot ", "", -1)
