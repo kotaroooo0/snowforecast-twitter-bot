@@ -11,6 +11,8 @@ deps:
 ## Run tests
 .PHONY: test
 test: deps
+	redis-cli -n 1 flushdb
+	cat db/data.txt | redis-cli -n 1 --pipe
 	REDIS_HOST=localhost go test ./... -v
 
 # Watch & run tests
@@ -41,12 +43,8 @@ realize:
 # Init data
 .PHONY: initdata
 initdata:
+	redis-cli flushdb
 	cat db/data.txt | redis-cli --pipe
-
-# Init test data
-.PHONY: inittestdata
-inittestdata:
-	cat db/data.txt | redis-cli -n 1 --pipe
 
 # Run redis
 .PHONY: redisup
