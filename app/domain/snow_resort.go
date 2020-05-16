@@ -53,14 +53,25 @@ func (ss SnowResortServiceImpl) ReplyForecast(snowResort SnowResort, tweet Tweet
 	return SnowResort{}, nil
 }
 
+// TODO: メソッドが大きすぎるので分割してもいかも
 func (ss SnowResortServiceImpl) GetSimilarSnowResortFromReply(reply string) (SnowResort, error) {
 	// @snowfall_botを消す
 	replyText := strings.Replace(reply, "@snowfall_bot ", "", -1)
 	// スペースを消す
 	replyText = strings.Replace(replyText, " ", "", -1)
-	replyText = strings.Replace(replyText, "　", "", -1)
+	key := strings.Replace(replyText, "　", "", -1)
+
+	// Redisにキャッシュしてある場合それを返す
+	cachedSnowResort, err := ss.SnowResortRepository.FindSnowResort(key)
+	if err != nil {
+		return SnowResort{}, err
+	}
+	if (cachedSnowResort != SnowResort{}) {
+		return cachedSnowResort, nil
+	}
+
 	// 漢字をひらがなに変換(ex:GALA湯沢 -> GALAゆざわ)
-	replyText = toHiragana(replyText, ss.YahooApiClient)
+	replyText = toHiragana(key, ss.YahooApiClient)
 	// ひらがなをアルファベットに変換(ex:GALAゆざわ -> GALAyuzawa)
 	replyText = jaconv.ToHebon(replyText)
 	// 残った大文字を小文字に直す(ex:GALAyuzawa -> galayuzawa)
@@ -77,7 +88,18 @@ func (ss SnowResortServiceImpl) GetSimilarSnowResortFromReply(reply string) (Sno
 	sources := append(lowercaseSnowResorts, snowResortLabels...)
 	similarSkiResortString := getSimilarSkiResort(replyText, sources)
 
-	return ss.SnowResortRepository.FindSnowResort(similarSkiResortString)
+	targetSnowResort, err := ss.SnowResortRepository.FindSnowResort(similarSkiResortString)
+	if err != nil {
+		return SnowResort{}, err
+	}
+
+	// Redisにキャッシュする
+	err = ss.SnowResortRepository.SetSnowResort(key, targetSnowResort)
+	if err != nil {
+		return SnowResort{}, err
+	}
+
+	return targetSnowResort, nil
 }
 
 func replyContent(snowResort SnowResort, snowforecastApiClient snowforecast.ISnowforecastApiClient) (string, error) {
@@ -160,4 +182,5 @@ func getSimilarSkiResort(target string, skiresorts []string) string {
 type SnowResortRepository interface {
 	ListSnowResorts(string) ([]string, error)
 	FindSnowResort(string) (SnowResort, error)
+	SetSnowResort(string, SnowResort) error
 }

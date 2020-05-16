@@ -38,3 +38,8 @@ func (s SnowResortRepositoryImpl) FindSnowResort(key string) (domain.SnowResort,
 
 	return domain.SnowResort{SearchWord: result["search_word"], Label: result["label"]}, nil
 }
+
+func (s SnowResortRepositoryImpl) SetSnowResort(key string, snowResort domain.SnowResort) error {
+	err := s.Client.HMSet(key, "search_word", snowResort.SearchWord, "label", snowResort.Label)
+	return err.Err()
+}

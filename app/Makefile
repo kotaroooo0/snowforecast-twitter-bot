@@ -11,12 +11,14 @@ deps:
 ## Run tests
 .PHONY: test
 test: deps
-	go test ./... -v
+	redis-cli -n 1 flushdb
+	cat db/data.txt | redis-cli -n 1 --pipe
+	REDIS_HOST=localhost go test ./... -v
 
 # Watch & run tests
 .PHONY: watchtest
 watchtest:
-	Watch -t make test | cgt
+	REDIS_HOST=localhost Watch -t make test | cgt
 
 ## Show help
 .PHONY: help
@@ -31,7 +33,7 @@ build: deps
 ## Run binary
 .PHONY: run
 run: build
-	./main
+	REDIS_HOST=localhost ./main
 
 # Watch & run app
 .PHONY: realize
@@ -41,12 +43,8 @@ realize:
 # Init data
 .PHONY: initdata
 initdata:
+	redis-cli flushdb
 	cat db/data.txt | redis-cli --pipe
-
-# Init test data
-.PHONY: inittestdata
-inittestdata:
-	cat db/data.txt | redis-cli -n 1 --pipe
 
 # Run redis
 .PHONY: redisup

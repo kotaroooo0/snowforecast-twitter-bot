@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/kotaroooo0/snowforecast-twitter-bot/domain"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/snowforecast"
@@ -36,7 +37,7 @@ func setupRouter() *gin.Engine {
 	twitterApiClient := twitter.NewTwitterApiClient()
 	yahooApiClient := yahoo.NewYahooApiClient()
 	snowforecastApiClient := snowforecast.NewSnowforecastApiClient()
-	redisClient, err := repository.New("redis:6379")
+	redisClient, err := repository.New(os.Getenv("REDIS_HOST") + ":6379")
 	if err != nil {
 		log.Fatal(err)
 	}
