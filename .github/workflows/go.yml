@@ -16,7 +16,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
         volumes:
-          - ./app/db:/data
+          - app/db:/data
     steps:
 
     - name: Set up Go 1.13
