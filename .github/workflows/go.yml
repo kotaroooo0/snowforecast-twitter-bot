@@ -11,8 +11,6 @@ jobs:
     services:
       redis:
         image: redis:latest
-        volumes:
-          - `pwd`/app/db:/data
         ports:
           - 6379:6379
         options: >-
@@ -26,6 +24,9 @@ jobs:
 
     - name: Create .env file
       run: cd app && echo "${{ secrets.GITHUBACTION_ENV }}" > .env
+
+    - name: Init redis data
+      run: sudo apt install redis-server
 
     - name: Get dependencies
       run: cd app && go get -v -d
