@@ -7,6 +7,14 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
 
     - name: Set up Go 1.13
@@ -23,5 +31,10 @@ jobs:
     - name: Build
       run: cd app && go build -v .
 
+    - name: Connect to Redis
+      run: cat db/data.txt | redis-cli -n 1 --pipe
+
     - name: Test
       run: cd app && go test -v ./...
+      env:
+        REDIS_HOST: localhost
