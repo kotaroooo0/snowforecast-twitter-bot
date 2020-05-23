@@ -10,7 +10,7 @@ jobs:
     container: golang:latest
     services:
       redis:
-        image: redis
+        image: redis:latest
         volumes:
           - /app/db:/data
         ports:
