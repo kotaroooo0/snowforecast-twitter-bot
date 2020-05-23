@@ -8,24 +8,28 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     container: golang:latest
-    services:
-      redis:
-        image: redis:latest
-        ports:
-          - 6379:6379
-        volumes:
-          - ./app/db:/data
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+    # services:
+    #   redis:
+    #     image: redis:latest
+    #     ports:
+    #       - 6379:6379
+    #     options: >-
+    #       --health-cmd "redis-cli ping"
+    #       --health-interval 10s
+    #       --health-timeout 5s
+    #       --health-retries 5
     steps:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
 
     - name: Create .env file
       run: cd app && echo "${{ secrets.GITHUBACTION_ENV }}" > .env
+
+    - name: Init redis data
+      uses: shogo82148/actions-setup-redis@v1
+      with:
+        redis-version: '6.0'
+      run: cat db/data.txt | redis-cli -n 1 --pipe
 
     - name: Init redis data
       run: sudo apt install redis-server
