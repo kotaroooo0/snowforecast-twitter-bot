@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"fmt"
+
 	"github.com/go-redis/redis/v7"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/domain"
 	"github.com/pkg/errors"
@@ -15,6 +17,11 @@ func New(addr string) (*redis.Client, error) {
 		Addr: addr,
 	})
 	if err := client.Ping().Err(); err != nil {
+		fmt.Println("New")
+		fmt.Println(addr)
+		fmt.Println(addr)
+		fmt.Println(addr)
+		fmt.Println(addr)
 		return nil, errors.Wrapf(err, "failed to ping redis server")
 	}
 	return client, nil
