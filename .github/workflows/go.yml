@@ -15,6 +15,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        volume: ./app/db:/data
     steps:
 
     - name: Set up Go 1.13
@@ -30,9 +31,6 @@ jobs:
 
     - name: Build
       run: cd app && go build -v .
-
-    - name: Connect to Redis
-      run: cat db/data.txt | redis-cli -n 1 --pipe
 
     - name: Test
       run: cd app && go test -v ./...
