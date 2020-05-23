@@ -12,7 +12,6 @@ import (
 	"github.com/bamzi/jobrunner"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"github.com/kotaroooo0/snowforecast-twitter-bot/batch"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/handler"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/twitter"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/yahoo"
@@ -26,11 +25,12 @@ func envLoad() {
 	}
 }
 
+// season outしたためストップ
 func setupBatch() {
-	api := twitter.GetTwitterApi()
+	// api := twitter.GetTwitterApi()
 	jobrunner.Start()
-	jobrunner.Schedule("00 01 * * *", batch.TweetForecast{api, "Hakuba47", "TakasuSnowPark"})
-	jobrunner.Schedule("20 01 * * *", batch.TweetForecast{api, "MarunumaKogen", "TashiroKaguraMitsumata"})
+	// jobrunner.Schedule("00 01 * * *", batch.TweetForecast{api, "Hakuba47", "TakasuSnowPark"})
+	// jobrunner.Schedule("20 01 * * *", batch.TweetForecast{api, "MarunumaKogen", "TashiroKaguraMitsumata"})
 }
 
 func setupRouter() *gin.Engine {
@@ -56,9 +56,7 @@ func setupRouter() *gin.Engine {
 
 func main() {
 	envLoad()
-
-	// season outしたためストップ
-	// setupBatch()
+	setupBatch()
 
 	r := setupRouter()
 	r.Run(":3000")
