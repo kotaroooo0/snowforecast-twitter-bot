@@ -12,7 +12,7 @@ jobs:
       redis:
         image: redis:latest
         volumes:
-          - $GITHUB_WORKSPACE/app/db:/data
+          - `pwd`/app/db:/data
         ports:
           - 6379:6379
         options: >-
