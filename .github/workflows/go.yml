@@ -12,7 +12,7 @@ jobs:
       redis:
         image: redis:latest
         volumes:
-          - /app/db:/data
+          - $GITHUB_WORKSPACE/app/db:/data
         ports:
           - 6379:6379
         options: >-
@@ -34,4 +34,4 @@ jobs:
       run: cd app && go build -v .
 
     - name: Test
-      run: cd app && cat db/data.txt | redis-cli -n 1 --pipe && go test -v ./...
+      run: cd app && go test -v ./...
