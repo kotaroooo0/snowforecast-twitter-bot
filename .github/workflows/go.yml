@@ -38,5 +38,3 @@ jobs:
 
     - name: Test
       run: cd app && go test -v ./...
-      env:
-        REDIS_HOST: localhost
