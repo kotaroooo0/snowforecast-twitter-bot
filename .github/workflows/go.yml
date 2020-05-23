@@ -28,7 +28,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Create .env file
-      run: cd app && echo "${{ secrets.GITHUBACTION_ENV }}" > .env && cat .env
+      run: cd app && echo "${{ secrets.GITHUBACTION_ENV }}"
 
     - name: Get dependencies
       run: cd app && go get -v -d

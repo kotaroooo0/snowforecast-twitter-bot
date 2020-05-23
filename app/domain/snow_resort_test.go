@@ -66,6 +66,10 @@ func testClient() (*redis.Client, error) {
 		DB:   1, // 1のDBをテスト用とする
 	})
 	if err := client.Ping().Err(); err != nil {
+		fmt.Println("Test Client New")
+		fmt.Println(os.Getenv("REDIS_HOST") + ":6379")
+		fmt.Println(os.Getenv("REDIS_HOST") + ":6379")
+		fmt.Println(os.Getenv("REDIS_HOST") + ":6379")
 		return nil, errors.Wrapf(err, "failed to ping redis server")
 	}
 	return client, nil
