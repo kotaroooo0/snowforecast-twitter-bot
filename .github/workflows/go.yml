@@ -17,6 +17,8 @@ jobs:
           --health-retries 5
         volumes:
           - /app/db:/data
+        ports:
+          - 6379:6379
     steps:
 
     - name: Set up Go 1.13
