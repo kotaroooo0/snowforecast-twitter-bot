@@ -25,14 +25,13 @@ jobs:
     - name: Create .env file
       run: cd app && echo "${{ secrets.GITHUBACTION_ENV }}" > .env
 
-    - name: Init redis data
+    - name: redis setup
       uses: shogo82148/actions-setup-redis@v1
       with:
         redis-version: '6.0'
-    - run: cat db/data.txt | redis-cli -n 1 --pipe
 
     - name: Init redis data
-      run: sudo apt install redis-server
+      run: cat db/data.txt | redis-cli -n 1 --pipe
 
     - name: Get dependencies
       run: cd app && go get -v -d
