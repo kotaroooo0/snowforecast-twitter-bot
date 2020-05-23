@@ -15,15 +15,10 @@ test: deps
 	cat db/data.txt | redis-cli -n 1 --pipe
 	REDIS_HOST=localhost go test ./... -v
 
-# Watch & run tests
+## Watch & run tests
 .PHONY: watchtest
 watchtest:
 	REDIS_HOST=localhost Watch -t make test | cgt
-
-## Show help
-.PHONY: help
-help:
-	@make2help $(MAKEFILE_LIST)
 
 ## Build binary
 .PHONY: build
@@ -35,18 +30,18 @@ build: deps
 run: build
 	REDIS_HOST=localhost ./main
 
-# Watch & run app
+## Watch & run app
 .PHONY: realize
 realize:
 	realize start
 
-# Init data
+## Init data
 .PHONY: initdata
 initdata:
 	redis-cli flushdb
 	cat db/data.txt | redis-cli --pipe
 
-# Run redis
+## Run redis
 .PHONY: redisup
 redisup:
 	redis-server /usr/local/etc/redis.conf
@@ -56,3 +51,8 @@ redisup:
 clean:
 	go clean
 	rm -f main
+
+## Show help
+.PHONY: help
+help:
+	@make2help $(MAKEFILE_LIST)
