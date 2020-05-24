@@ -1,5 +1,7 @@
 # SnowforecastTwitterBot
 
+![Go](https://github.com/kotaroooo0/snowforecast-twitter-bot/workflows/Go/badge.svg)
+
 ## Twitter
 
 - [@snowfall_bot](https://twitter.com/snowfall_bot)
@@ -79,4 +81,4 @@ kotaroooo0
 
 ## LICENSE
 
-Apache License
+MIT
