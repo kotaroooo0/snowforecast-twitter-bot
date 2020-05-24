@@ -21,7 +21,7 @@ jobs:
     - name: Build
       run: cd app && go build -v .
 
-  build:
+  test:
     name: Test
     runs-on: ubuntu-latest
     container: golang:latest
