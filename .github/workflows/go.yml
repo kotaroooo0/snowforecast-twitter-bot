@@ -1,6 +1,6 @@
 name: Go
 
-on: [push, pull_request]
+on: pull_request
 
 jobs:
 
@@ -40,4 +40,4 @@ jobs:
       run: cd app && go build -v .
 
     - name: Test
-      run: redis-cli keys ** && cd app && REDIS_HOST=localhost go test -v ./...
+      run: redis-cli keys "*" && cd app && REDIS_HOST=localhost go test -v ./...
