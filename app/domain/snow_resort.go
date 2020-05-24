@@ -86,6 +86,8 @@ func (ss SnowResortServiceImpl) GetSimilarSnowResortFromReply(reply string) (Sno
 		return SnowResort{}, err
 	}
 	sources := append(lowercaseSnowResorts, snowResortLabels...)
+	fmt.Println(sources)
+	fmt.Println(len(sources))
 	similarSkiResortString := getSimilarSkiResort(replyText, sources)
 
 	targetSnowResort, err := ss.SnowResortRepository.FindSnowResort(similarSkiResortString)
