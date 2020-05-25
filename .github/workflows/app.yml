@@ -1,9 +1,10 @@
-name: app
+name: App
 
 on: push
 
 jobs:
-    deploy:
+  deploy:
+    name: Deploy
     runs-on: ubuntu-latest
     steps:
 
