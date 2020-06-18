@@ -1,0 +1,4 @@
+db
+*_test.go
+.env.sample
+Makefile
