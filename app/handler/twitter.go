@@ -13,24 +13,30 @@ type TwitterHandler interface {
 }
 
 type TwitterHandlerImpl struct {
-	TwitterUseCase usecase.TwitterUseCase
+	TwitterUsecase usecase.TwitterUsecase
+}
+
+func NewTwitterHandler(twitterUsecase usecase.TwitterUsecase) TwitterHandler {
+	return TwitterHandlerImpl{
+		TwitterUsecase: twitterUsecase,
+	}
 }
 
 func (th TwitterHandlerImpl) HandleTwitterGetCrcToken(ctx *gin.Context) {
-	req := th.TwitterUseCase.NewGetTwitterWebhookRequest()
+	req := th.TwitterUsecase.NewGetTwitterWebhookRequest()
 	if err := ctx.Bind(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, err)
 	}
-	res := th.TwitterUseCase.GetCrcTokenResponse(req)
+	res := th.TwitterUsecase.GetCrcTokenResponse(req)
 	ctx.JSON(http.StatusOK, res)
 }
 
 func (th TwitterHandlerImpl) HandleTwitterPostWebhook(ctx *gin.Context) {
-	req := th.TwitterUseCase.NewPostTwitterWebhookRequest()
+	req := th.TwitterUsecase.NewPostTwitterWebhookRequest()
 	if err := ctx.Bind(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, err)
 	}
 
-	res := th.TwitterUseCase.PostAutoReplyResponse(req)
+	res := th.TwitterUsecase.PostAutoReplyResponse(req)
 	ctx.JSON(http.StatusOK, res)
 }

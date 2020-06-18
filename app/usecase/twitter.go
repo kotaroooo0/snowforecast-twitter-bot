@@ -7,28 +7,32 @@ import (
 	"os"
 
 	"github.com/kotaroooo0/snowforecast-twitter-bot/domain"
-	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/yahoo"
 )
 
-type TwitterUseCase interface {
+type TwitterUsecase interface {
 	NewGetTwitterWebhookRequest() GetTwitterWebhookRequest
 	NewPostTwitterWebhookRequest() PostTwitterWebhookRequest
 	GetCrcTokenResponse(GetTwitterWebhookRequest) GetTwitterWebhookResponse
 	PostAutoReplyResponse(PostTwitterWebhookRequest) PostTwitterWebhookResponse
 }
 
-type TwitterUseCaseImpl struct {
+type TwitterUsecaseImpl struct {
 	SnowResortService domain.SnowResortService
-	YahooApiClient    yahoo.IYahooApiClient
 }
 
-func (tu TwitterUseCaseImpl) NewGetTwitterWebhookRequest() GetTwitterWebhookRequest {
+func NewTwitterUsecase(snowResortService domain.SnowResortService) TwitterUsecase {
+	return TwitterUsecaseImpl{
+		SnowResortService: snowResortService,
+	}
+}
+
+func (tu TwitterUsecaseImpl) NewGetTwitterWebhookRequest() GetTwitterWebhookRequest {
 	return GetTwitterWebhookRequest{}
 }
 
 // TwitterのWebhookの認証に用いる
 // ref: https://developer.twitter.com/en/docs/accounts-and-users/subscribe-account-activity/guides/securing-webhooks
-func (tu TwitterUseCaseImpl) GetCrcTokenResponse(req GetTwitterWebhookRequest) GetTwitterWebhookResponse {
+func (tu TwitterUsecaseImpl) GetCrcTokenResponse(req GetTwitterWebhookRequest) GetTwitterWebhookResponse {
 	mac := hmac.New(sha256.New, []byte(os.Getenv("CONSUMER_SECRET")))
 	mac.Write([]byte(req.CrcToken))
 	return GetTwitterWebhookResponse{
@@ -36,11 +40,11 @@ func (tu TwitterUseCaseImpl) GetCrcTokenResponse(req GetTwitterWebhookRequest) G
 	}
 }
 
-func (tu TwitterUseCaseImpl) NewPostTwitterWebhookRequest() PostTwitterWebhookRequest {
+func (tu TwitterUsecaseImpl) NewPostTwitterWebhookRequest() PostTwitterWebhookRequest {
 	return PostTwitterWebhookRequest{}
 }
 
-func (tu TwitterUseCaseImpl) PostAutoReplyResponse(req PostTwitterWebhookRequest) PostTwitterWebhookResponse {
+func (tu TwitterUsecaseImpl) PostAutoReplyResponse(req PostTwitterWebhookRequest) PostTwitterWebhookResponse {
 	// リプライがない、もしくはユーザが不正な場合は空を返す
 	if len(req.TweetCreateEvents) < 1 || req.UserID == req.TweetCreateEvents[0].User.IDStr {
 		return PostTwitterWebhookResponse{}

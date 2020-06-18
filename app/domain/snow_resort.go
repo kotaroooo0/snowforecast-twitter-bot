@@ -39,6 +39,15 @@ type SnowResortServiceImpl struct {
 	SnowforecastApiClient snowforecast.ISnowforecastApiClient
 }
 
+func NewSnowResortService(snowResortRepository SnowResortRepository, yahooApiClient YahooApiClient, twitterApiClient TwitterApiClient, snowforecastApiClient SnowforecastApiClient) SnowResortService {
+	return SnowResortServiceImpl{
+		SnowResortRepository:  snowResortRepository,
+		YahooApiClient:        yahooApiClient,
+		TwitterApiClient:      twitterApiClient,
+		SnowforecastApiClient: snowforecastApiClient,
+	}
+}
+
 func (ss SnowResortServiceImpl) ReplyForecast(snowResort SnowResort, tweet Tweet) (SnowResort, error) {
 	params := url.Values{}
 	params.Set("in_reply_to_status_id", tweet.ID)
