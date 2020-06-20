@@ -1,3 +1,4 @@
+# syntax = docker/dockerfile:experimental
 FROM golang as builder
 
 WORKDIR /go/src/github.com/kotaroooo0/snowforecast-twitter-bot/app
@@ -7,7 +8,8 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 go build -o main
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=0 go build -o main
 
 FROM scratch
 
