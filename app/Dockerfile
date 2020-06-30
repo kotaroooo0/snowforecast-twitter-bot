@@ -3,7 +3,7 @@ FROM golang as builder
 
 WORKDIR /go/src/github.com/kotaroooo0/snowforecast-twitter-bot/app
 
-COPY go.mod go.sum .
+COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
