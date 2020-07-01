@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:experimental
-FROM golang as builder
+FROM golang:1.14-alpine as builder
 
 WORKDIR /go/src/github.com/kotaroooo0/snowforecast-twitter-bot/app
 
