@@ -9,9 +9,3 @@ services:
     image: redis:alpine
     volumes:
       - ./app/db:/data
-  nginx:
-    build: ./nginx
-    ports:
-      - "80:80"
-    depends_on:
-      - app
