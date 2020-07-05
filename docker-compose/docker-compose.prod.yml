@@ -35,7 +35,7 @@ services:
       - 443:443
     restart: always
     environment:
-      DOMAINS:  'http://ec2-18-177-150-28.ap-northeast-1.compute.amazonaws.com/ -> http://nginx:8000'
+      DOMAINS:  'snowfall.gq -> http://nginx:8000'
       STAGE: "production"
       FORCE_RENEW: 'false'
     volumes:
