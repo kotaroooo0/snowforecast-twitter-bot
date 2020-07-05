@@ -1,4 +1,4 @@
-db
-*_test.go
+docker-compose
 .env.sample
 Makefile
+README.md
