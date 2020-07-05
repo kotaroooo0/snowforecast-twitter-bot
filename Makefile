@@ -52,6 +52,11 @@ clean:
 	go clean
 	rm -f main
 
+## docker-compose up for produciton
+.PHONY: produciton
+up:
+	docker-compose -f docker-compose/docker-compose.prod.yml up
+
 ## Show help
 .PHONY: help
 help:
