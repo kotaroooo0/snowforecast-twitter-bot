@@ -1,0 +1,20 @@
+version: "3"
+
+services:
+  app:
+    build: ..
+    links:
+        - redis
+        - rdb
+    depends_on:
+        - redis
+        - rdb
+  rdb:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+  redis:
+    image: redis:6.0.5-alpine
+    volumes:
+      - ../db:/data
