@@ -18,6 +18,7 @@ require (
 	github.com/go-redis/redis/v7 v7.2.0
 	github.com/gomodule/redigo v2.0.0+incompatible // indirect
 	github.com/google/go-cmp v0.4.0
+	github.com/google/wire v0.4.0
 	github.com/joho/godotenv v1.3.0
 	github.com/kotaroooo0/gojaconv v0.0.0-20200509065727-782aa1b5564d
 	github.com/pkg/errors v0.9.1
