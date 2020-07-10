@@ -4,22 +4,21 @@ import (
 	"github.com/go-redis/redis/v7"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/domain"
 	"github.com/pkg/errors"
-	"os"
 )
 
 type SnowResortRepositoryImpl struct {
 	Client *redis.Client
 }
 
-func NewSnowResortRepository(client *redis.Client) domain.SnowResortRepository {
+func NewSnowResortRepository(client Client) SnowResortRepository {
 	return SnowResortRepositoryImpl{
-		Client: client,
+		Client: client
 	}
 }
 
-func NewRedisClient() (*redis.Client, error) {
+func NewRedisClient(addr string) (*redis.Client, error) {
 	client := redis.NewClient(&redis.Options{
-		Addr: os.Getenv("REDIS_HOST") + ":6379",
+		Addr: addr,
 	})
 	if err := client.Ping().Err(); err != nil {
 		return nil, errors.Wrapf(err, "failed to ping redis server")

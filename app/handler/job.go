@@ -13,10 +13,6 @@ type JobHandler interface {
 
 type JobHandlerImpl struct{}
 
-func NewJobHandler() JobHandler {
-	return JobHandlerImpl{}
-}
-
 func (jh JobHandlerImpl) HandleGetJobStatus(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, jobrunner.StatusJson())
 }

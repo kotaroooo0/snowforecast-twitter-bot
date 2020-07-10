@@ -39,7 +39,7 @@ type SnowResortServiceImpl struct {
 	SnowforecastApiClient snowforecast.ISnowforecastApiClient
 }
 
-func NewSnowResortService(snowResortRepository SnowResortRepository, yahooApiClient yahoo.IYahooApiClient, twitterApiClient twitter.ITwitterApiClient, snowforecastApiClient snowforecast.ISnowforecastApiClient) SnowResortService {
+func NewSnowResortService(snowResortRepository SnowResortRepository, yahooApiClient YahooApiClient, twitterApiClient TwitterApiClient, snowforecastApiClient SnowforecastApiClient) SnowResortService {
 	return SnowResortServiceImpl{
 		SnowResortRepository:  snowResortRepository,
 		YahooApiClient:        yahooApiClient,
