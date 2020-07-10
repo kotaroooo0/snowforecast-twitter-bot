@@ -4,17 +4,18 @@ import (
 	"log"
 	"os"
 
+	"github.com/kotaroooo0/snowforecast-twitter-bot/domain"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/snowforecast"
+
+	repository "github.com/kotaroooo0/snowforecast-twitter-bot/infrastructure"
+
 	"github.com/bamzi/jobrunner"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"github.com/kotaroooo0/snowforecast-twitter-bot/domain"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/handler"
-	repository "github.com/kotaroooo0/snowforecast-twitter-bot/infrastructure"
-	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/snowforecast"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/twitter"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/yahoo"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/usecase"
-	"go.uber.org/dig"
 )
 
 func envLoad() {
@@ -33,19 +34,11 @@ func setupBatch() {
 }
 
 func setupRouter() *gin.Engine {
-	r := gin.Default()
 	c := dig.New()
-
-	c.Provide(NewTwitterApiClient)
-	c.Provide(NewYahooApiClient)
-	c.Provide(NewSnowForecastApiClient)
-
-	c.Invoke(func(twitterHandler handler.TwitterHandlerImpl) {
-		r.GET("/twitter_webhook", twitterHandler.HandleTwitterGetCrcToken)
-		r.POST("/twitter_webhook", twitterHandler.HandleTwitterPostWebhook)
-	})
-	c.Invoke(func(jobHandler handler.JobHandlerImpl) {
-		r.GET("/job_status", jobHandler.HandleGetJobStatus)
+	c.Provide(NewUsecase)
+	c.Provide(NewRepository)
+	c.Invoke(func(u Usecase) {
+		u.Use()
 	})
 
 	twitterApiClient := twitter.NewTwitterApiClient()
@@ -57,10 +50,14 @@ func setupRouter() *gin.Engine {
 	}
 	snowResortRepository := repository.SnowResortRepositoryImpl{Client: redisClient}
 	snowResortService := domain.SnowResortServiceImpl{SnowResortRepository: snowResortRepository, TwitterApiClient: twitterApiClient, SnowforecastApiClient: snowforecastApiClient, YahooApiClient: yahooApiClient}
-	twitterUsecase := usecase.TwitterUsecaseImpl{SnowResortService: snowResortService}
-	twitterHandler := handler.TwitterHandlerImpl{TwitterUsecase: twitterUsecase}
+	twitterUseCase := usecase.TwitterUseCaseImpl{SnowResortService: snowResortService}
+	twitterHandler := handler.TwitterHandlerImpl{TwitterUseCase: twitterUseCase}
 	jobHandler := handler.JobHandlerImpl{}
 
+	r := gin.Default()
+	r.GET("/twitter_webhook", twitterHandler.HandleTwitterGetCrcToken)
+	r.POST("/twitter_webhook", twitterHandler.HandleTwitterPostWebhook)
+	r.GET("/job_status", jobHandler.HandleGetJobStatus)
 	return r
 }
 

@@ -12,7 +12,7 @@ type ISnowforecastApiClient interface {
 
 type SnowforecastApiClient struct{}
 
-func NewISnowforecastApiClient() ISnowforecastApiClient {
+func NewSnowforecastApiClient() SnowforecastApiClient {
 	return SnowforecastApiClient{}
 }
 

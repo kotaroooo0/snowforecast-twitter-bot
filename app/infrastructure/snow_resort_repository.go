@@ -10,13 +10,7 @@ type SnowResortRepositoryImpl struct {
 	Client *redis.Client
 }
 
-func NewSnowResortRepository(client Client) SnowResortRepository {
-	return SnowResortRepositoryImpl{
-		Client: client
-	}
-}
-
-func NewRedisClient(addr string) (*redis.Client, error) {
+func New(addr string) (*redis.Client, error) {
 	client := redis.NewClient(&redis.Options{
 		Addr: addr,
 	})
