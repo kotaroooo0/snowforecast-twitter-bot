@@ -20,7 +20,7 @@ func NewRedisClient(addr string) (*redis.Client, error) {
 	return client, nil
 }
 
-func NewSnowResortRepositoryImpl(client *redis.Client) *SnowResortRepositoryImpl {
+func NewSnowResortRepositoryImpl(client *redis.Client) domain.SnowResortRepository {
 	return &SnowResortRepositoryImpl{
 		Client: client,
 	}
