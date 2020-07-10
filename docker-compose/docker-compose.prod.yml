@@ -1,0 +1,44 @@
+version: "3"
+
+services:
+  app:
+    build: ..
+    links:
+        - redis
+        - rdb
+    depends_on:
+        - redis
+        - rdb
+
+  rdb:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+
+  redis:
+    image: redis:6.0.5-alpine
+    volumes:
+      - ../db:/data
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "8000:8000"
+    depends_on:
+      - app
+
+  https-portal:
+    image: steveltn/https-portal:1
+    ports:
+      - 80:80
+      - 443:443
+    restart: always
+    environment:
+      DOMAINS:  'snowfall.gq -> http://nginx:8000'
+      STAGE: "production"
+      FORCE_RENEW: 'false'
+    volumes:
+      - /data/ssl_certs:/var/lib/https-portal
+    depends_on:
+      - nginx
