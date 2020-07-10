@@ -34,13 +34,6 @@ func setupBatch() {
 }
 
 func setupRouter() *gin.Engine {
-	c := dig.New()
-	c.Provide(NewUsecase)
-	c.Provide(NewRepository)
-	c.Invoke(func(u Usecase) {
-		u.Use()
-	})
-
 	twitterApiClient := twitter.NewTwitterApiClient()
 	yahooApiClient := yahoo.NewYahooApiClient()
 	snowforecastApiClient := snowforecast.NewSnowforecastApiClient()
