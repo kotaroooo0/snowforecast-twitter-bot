@@ -17,7 +17,7 @@ import (
 
 // Injectors from injector.go:
 
-func initNewTwitterHandlerImpl(tc *TwitterConfig, yc *YahooConfig, rc *RedisConfig) (handler.TwitterHandler, error) {
+func initNewTwitterHandlerImpl(tc *twitter.TwitterConfig, yc *yahoo.YahooConfig, rc *repository.RedisConfig) (handler.TwitterHandler, error) {
 	client, err := repository.NewRedisClient(rc)
 	if err != nil {
 		return nil, err
