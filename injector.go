@@ -12,7 +12,7 @@ import (
 	"github.com/kotaroooo0/snowforecast-twitter-bot/usecase"
 )
 
-func initNewTwitterHandlerImpl(addr string) (handler.TwitterHandler, error) {
+func initNewTwitterHandlerImpl(tc *twitter.TwitterConfig, yc *yahoo.YahooConfig, rc *repository.RedisConfig) (handler.TwitterHandler, error) {
 	wire.Build(
 		yahoo.NewYahooApiClient,
 		twitter.NewTwitterApiClient,
@@ -24,4 +24,11 @@ func initNewTwitterHandlerImpl(addr string) (handler.TwitterHandler, error) {
 		handler.NewTwitterHandlerImpl,
 	)
 	return &handler.TwitterHandlerImpl{}, nil
+}
+
+func initNewJobHandlerImpl() handler.JobHandler {
+	wire.Build(
+		handler.NewJobHandlerImpl,
+	)
+	return &handler.JobHandlerImpl{}
 }

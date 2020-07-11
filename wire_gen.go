@@ -17,17 +17,22 @@ import (
 
 // Injectors from injector.go:
 
-func initNewTwitterHandlerImpl(addr string) (handler.TwitterHandler, error) {
-	client, err := repository.NewRedisClient(addr)
+func initNewTwitterHandlerImpl(tc *twitter.TwitterConfig, yc *yahoo.YahooConfig, rc *repository.RedisConfig) (handler.TwitterHandler, error) {
+	client, err := repository.NewRedisClient(rc)
 	if err != nil {
 		return nil, err
 	}
 	snowResortRepository := repository.NewSnowResortRepositoryImpl(client)
-	iYahooApiClient := yahoo.NewYahooApiClient()
-	iTwitterApiClient := twitter.NewTwitterApiClient()
+	iYahooApiClient := yahoo.NewYahooApiClient(yc)
+	iTwitterApiClient := twitter.NewTwitterApiClient(tc)
 	iSnowforecastApiClient := snowforecast.NewSnowforecastApiClient()
 	snowResortService := domain.NewSnowResortServiceImpl(snowResortRepository, iYahooApiClient, iTwitterApiClient, iSnowforecastApiClient)
 	twitterUseCase := usecase.NewTwitterUseCaseImpl(snowResortService, iYahooApiClient)
 	twitterHandler := handler.NewTwitterHandlerImpl(twitterUseCase)
 	return twitterHandler, nil
+}
+
+func initNewJobHandlerImpl() handler.JobHandler {
+	jobHandler := handler.NewJobHandlerImpl()
+	return jobHandler
 }

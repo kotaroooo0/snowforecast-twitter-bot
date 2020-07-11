@@ -10,14 +10,24 @@ type SnowResortRepositoryImpl struct {
 	Client *redis.Client
 }
 
-func NewRedisClient(addr string) (*redis.Client, error) {
+func NewRedisClient(redisConfig *RedisConfig) (*redis.Client, error) {
 	client := redis.NewClient(&redis.Options{
-		Addr: addr,
+		Addr: redisConfig.Addr,
 	})
 	if err := client.Ping().Err(); err != nil {
 		return nil, errors.Wrapf(err, "failed to ping redis server")
 	}
 	return client, nil
+}
+
+type RedisConfig struct {
+	Addr string
+}
+
+func NewRedisConfig(addr string) *RedisConfig {
+	return &RedisConfig{
+		Addr: addr,
+	}
 }
 
 func NewSnowResortRepositoryImpl(client *redis.Client) domain.SnowResortRepository {
