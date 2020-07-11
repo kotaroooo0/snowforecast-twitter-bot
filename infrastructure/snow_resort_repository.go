@@ -12,7 +12,7 @@ type SnowResortRepositoryImpl struct {
 
 func NewRedisClient(redisConfig *RedisConfig) (*redis.Client, error) {
 	client := redis.NewClient(&redis.Options{
-		Addr: redisConfig.Addr,
+		Addr: redisConfig.Addr + ":6379",
 	})
 	if err := client.Ping().Err(); err != nil {
 		return nil, errors.Wrapf(err, "failed to ping redis server")
