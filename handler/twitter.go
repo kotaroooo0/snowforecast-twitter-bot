@@ -16,6 +16,12 @@ type TwitterHandlerImpl struct {
 	TwitterUseCase usecase.TwitterUseCase
 }
 
+func NewTwitterHandlerImpl(twitterUseCase usecase.TwitterUseCase) TwitterHandler {
+	return &TwitterHandlerImpl{
+		TwitterUseCase: twitterUseCase,
+	}
+}
+
 func (th TwitterHandlerImpl) HandleTwitterGetCrcToken(ctx *gin.Context) {
 	req := th.TwitterUseCase.NewGetTwitterWebhookRequest()
 	if err := ctx.Bind(&req); err != nil {

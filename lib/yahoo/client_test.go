@@ -2,6 +2,7 @@ package yahoo
 
 import (
 	"log"
+	"os"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -87,7 +88,7 @@ func TestGetMorphologicalAnalysis(t *testing.T) {
 		},
 	}
 
-	client := NewYahooApiClient()
+	client := NewYahooApiClient(NewYahooConfig(os.Getenv("YAHOO_APP_ID")))
 	for _, tt := range cases {
 		act, err := client.GetMorphologicalAnalysis(tt.input)
 		if err != nil {

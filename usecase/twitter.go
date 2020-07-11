@@ -22,6 +22,13 @@ type TwitterUseCaseImpl struct {
 	YahooApiClient    yahoo.IYahooApiClient
 }
 
+func NewTwitterUseCaseImpl(snowResortService domain.SnowResortService, yahooApiClient yahoo.IYahooApiClient) TwitterUseCase {
+	return &TwitterUseCaseImpl{
+		SnowResortService: snowResortService,
+		YahooApiClient:    yahooApiClient,
+	}
+}
+
 func (tu TwitterUseCaseImpl) NewGetTwitterWebhookRequest() GetTwitterWebhookRequest {
 	return GetTwitterWebhookRequest{}
 }

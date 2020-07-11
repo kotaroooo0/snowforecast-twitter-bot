@@ -12,8 +12,8 @@ type ISnowforecastApiClient interface {
 
 type SnowforecastApiClient struct{}
 
-func NewSnowforecastApiClient() SnowforecastApiClient {
-	return SnowforecastApiClient{}
+func NewSnowforecastApiClient() ISnowforecastApiClient {
+	return &SnowforecastApiClient{}
 }
 
 // 以下の3パターンの予報が取得できる

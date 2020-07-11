@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"os"
 )
 
 type IYahooApiClient interface {
@@ -16,9 +15,19 @@ type YahooApiClient struct {
 	YahooAppID string
 }
 
-func NewYahooApiClient() IYahooApiClient {
+func NewYahooApiClient(yahooConfig *YahooConfig) IYahooApiClient {
 	return &YahooApiClient{
-		YahooAppID: os.Getenv("YAHOO_APP_ID"),
+		YahooAppID: yahooConfig.YahooAppKey,
+	}
+}
+
+type YahooConfig struct {
+	YahooAppKey string
+}
+
+func NewYahooConfig(yahooApiKey string) *YahooConfig {
+	return &YahooConfig{
+		YahooAppKey: yahooApiKey,
 	}
 }
 

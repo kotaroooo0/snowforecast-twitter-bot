@@ -1,10 +1,8 @@
 package twitter
 
 import (
-	"net/url"
-	"os"
-
 	"github.com/ChimeraCoder/anaconda"
+	"net/url"
 )
 
 type ITwitterApiClient interface {
@@ -13,17 +11,24 @@ type ITwitterApiClient interface {
 
 type TwitterApiClient *anaconda.TwitterApi
 
-func NewTwitterApiClient() ITwitterApiClient {
-	anaconda.SetConsumerKey(os.Getenv("CONSUMER_KEY"))
-	anaconda.SetConsumerSecret(os.Getenv("CONSUMER_SECRET"))
-	api := anaconda.NewTwitterApi(os.Getenv("ACCESS_TOKEN_KEY"), os.Getenv("ACCESS_TOKEN_SECRET"))
-	return api
+func NewTwitterApiClient(twitterConfig *TwitterConfig) ITwitterApiClient {
+	anaconda.SetConsumerKey(twitterConfig.ConsumerKey)
+	anaconda.SetConsumerSecret(twitterConfig.ConsumerSecret)
+	return anaconda.NewTwitterApi(twitterConfig.AccessTokenKey, twitterConfig.AccessTokenSecret)
 }
 
-// TODO: バッチ処理の部分もインターフェースで置き換えたら消す
-func GetTwitterApi() *anaconda.TwitterApi {
-	anaconda.SetConsumerKey(os.Getenv("CONSUMER_KEY"))
-	anaconda.SetConsumerSecret(os.Getenv("CONSUMER_SECRET"))
-	api := anaconda.NewTwitterApi(os.Getenv("ACCESS_TOKEN_KEY"), os.Getenv("ACCESS_TOKEN_SECRET"))
-	return api
+type TwitterConfig struct {
+	ConsumerKey       string
+	ConsumerSecret    string
+	AccessTokenKey    string
+	AccessTokenSecret string
+}
+
+func NewTwitterConfig(consumerKey string, consumerSecret string, accessTokenKey string, accessTokenSecret string) *TwitterConfig {
+	return &TwitterConfig{
+		ConsumerKey:       consumerKey,
+		ConsumerSecret:    consumerSecret,
+		AccessTokenKey:    accessTokenKey,
+		AccessTokenSecret: accessTokenSecret,
+	}
 }

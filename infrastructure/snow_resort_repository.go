@@ -10,14 +10,30 @@ type SnowResortRepositoryImpl struct {
 	Client *redis.Client
 }
 
-func New(addr string) (*redis.Client, error) {
+func NewRedisClient(redisConfig *RedisConfig) (*redis.Client, error) {
 	client := redis.NewClient(&redis.Options{
-		Addr: addr,
+		Addr: redisConfig.Addr + ":6379",
 	})
 	if err := client.Ping().Err(); err != nil {
 		return nil, errors.Wrapf(err, "failed to ping redis server")
 	}
 	return client, nil
+}
+
+type RedisConfig struct {
+	Addr string
+}
+
+func NewRedisConfig(addr string) *RedisConfig {
+	return &RedisConfig{
+		Addr: addr,
+	}
+}
+
+func NewSnowResortRepositoryImpl(client *redis.Client) domain.SnowResortRepository {
+	return &SnowResortRepositoryImpl{
+		Client: client,
+	}
 }
 
 // TODO: DomainModelを返すように修正
