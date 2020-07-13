@@ -9,15 +9,26 @@ import (
 	"github.com/kotaroooo0/gojaconv/jaconv"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/snowforecast"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/yahoo"
-	"github.com/texttheater/golang-levenshtein/levenshtein"
 	"golang.org/x/exp/utf8string"
 
 	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/twitter"
 )
 
 type SnowResort struct {
-	SearchWord string
-	Label      string
+	Id        int    `db:"id"`
+	Name      string `db:"name"`
+	SearchKey string `db:"search_key"`
+	Elevation int    `db:"elevation"`
+	Region    string `db:"region"`
+}
+
+type SnowResortRepository interface {
+	FindAll() ([]*SnowResort, error)
+}
+
+type SnowResortCache interface {
+	Get(string) (*SnowResort, error)
+	Set(string, *SnowResort) error
 }
 
 type Tweet struct {
@@ -27,43 +38,45 @@ type Tweet struct {
 }
 
 type SnowResortService interface {
-	ReplyForecast(SnowResort, Tweet) (SnowResort, error)
-	GetSimilarSnowResortFromReply(string) (SnowResort, error)
+	ReplyForecast(*SnowResort, *Tweet) (*SnowResort, error)
+	GetSimilarSnowResortFromReply(string) (*SnowResort, error) // こいつは外部へ出してもいいかも、このレイヤーではリプライにのみ集中したい
 }
 
 type SnowResortServiceImpl struct {
 	// ドメイン層はどの層にも依存しない
 	SnowResortRepository  SnowResortRepository
+	SnowResortCache       SnowResortCache
 	YahooApiClient        yahoo.IYahooApiClient
 	TwitterApiClient      twitter.ITwitterApiClient
 	SnowforecastApiClient snowforecast.ISnowforecastApiClient
 }
 
-func NewSnowResortServiceImpl(snowResortRepository SnowResortRepository, yahooApiClient yahoo.IYahooApiClient, twitterApiClient twitter.ITwitterApiClient, snowforecastApiClient snowforecast.ISnowforecastApiClient) SnowResortService {
+func NewSnowResortServiceImpl(snowResortRepository SnowResortRepository, snowResortCache SnowResortCache, yahooApiClient yahoo.IYahooApiClient, twitterApiClient twitter.ITwitterApiClient, snowforecastApiClient snowforecast.ISnowforecastApiClient) SnowResortService {
 	return &SnowResortServiceImpl{
 		SnowResortRepository:  snowResortRepository,
+		SnowResortCache:       snowResortCache,
 		YahooApiClient:        yahooApiClient,
 		TwitterApiClient:      twitterApiClient,
 		SnowforecastApiClient: snowforecastApiClient,
 	}
 }
 
-func (ss SnowResortServiceImpl) ReplyForecast(snowResort SnowResort, tweet Tweet) (SnowResort, error) {
+func (ss SnowResortServiceImpl) ReplyForecast(snowResort *SnowResort, tweet *Tweet) (*SnowResort, error) {
 	params := url.Values{}
 	params.Set("in_reply_to_status_id", tweet.ID)
 	content, err := replyContent(snowResort, ss.SnowforecastApiClient)
 	if err != nil {
-		return SnowResort{}, err
+		return &SnowResort{}, err
 	}
 	_, err = ss.TwitterApiClient.PostTweet(fmt.Sprintf("@%s %s", tweet.UserScreenName, content), params)
 	if err != nil {
-		return SnowResort{}, err
+		return &SnowResort{}, err
 	}
-	return SnowResort{}, nil
+	return &SnowResort{}, nil
 }
 
 // TODO: メソッドが大きすぎるので分割してもいかも
-func (ss SnowResortServiceImpl) GetSimilarSnowResortFromReply(reply string) (SnowResort, error) {
+func (ss SnowResortServiceImpl) GetSimilarSnowResortFromReply(reply string) (*SnowResort, error) {
 	// @snowfall_botを消す
 	replyText := strings.Replace(reply, "@snowfall_bot ", "", -1)
 	// スペースを消す
@@ -71,11 +84,11 @@ func (ss SnowResortServiceImpl) GetSimilarSnowResortFromReply(reply string) (Sno
 	key := strings.Replace(replyText, "　", "", -1)
 
 	// Redisにキャッシュしてある場合それを返す
-	cachedSnowResort, err := ss.SnowResortRepository.FindSnowResort(key)
+	cachedSnowResort, err := ss.SnowResortCache.Get(key)
 	if err != nil {
-		return SnowResort{}, err
+		return &SnowResort{}, err
 	}
-	if (cachedSnowResort != SnowResort{}) {
+	if (cachedSnowResort != &SnowResort{}) {
 		return cachedSnowResort, nil
 	}
 
@@ -86,39 +99,32 @@ func (ss SnowResortServiceImpl) GetSimilarSnowResortFromReply(reply string) (Sno
 	// 残った大文字を小文字に直す(ex:GALAyuzawa -> galayuzawa)
 	replyText = strings.ToLower(replyText)
 
-	lowercaseSnowResorts, err := ss.SnowResortRepository.ListSnowResorts("lowercase-snowresorts-searchword")
+	snowResorts, err := ss.SnowResortRepository.FindAll()
 	if err != nil {
-		return SnowResort{}, err
+		return &SnowResort{}, err
 	}
-	snowResortLabels, err := ss.SnowResortRepository.ListSnowResorts("lowercase-snowresorts-label")
-	if err != nil {
-		return SnowResort{}, err
-	}
-	sources := append(lowercaseSnowResorts, snowResortLabels...)
-	similarSkiResortString := getSimilarSkiResort(replyText, sources)
 
-	targetSnowResort, err := ss.SnowResortRepository.FindSnowResort(similarSkiResortString)
-	if err != nil {
-		return SnowResort{}, err
-	}
+	// TODO: 小文字にしてNameとLabelをアレする
+	// TODO: 以下のメソッドを実装
+	similarSnowResort := getSimilarSnowResort(replyText, snowResorts)
 
 	// Redisにキャッシュする
-	err = ss.SnowResortRepository.SetSnowResort(key, targetSnowResort)
+	err = ss.SnowResortCache.Set(key, similarSnowResort)
 	if err != nil {
-		return SnowResort{}, err
+		return &SnowResort{}, err
 	}
 
-	return targetSnowResort, nil
+	return similarSnowResort, nil
 }
 
-func replyContent(snowResort SnowResort, snowforecastApiClient snowforecast.ISnowforecastApiClient) (string, error) {
-	snowfallForecast, err := snowforecastApiClient.GetSnowfallForecastBySkiResortSearchWord(snowResort.SearchWord)
+func replyContent(snowResort *SnowResort, snowforecastApiClient snowforecast.ISnowforecastApiClient) (string, error) {
+	snowfallForecast, err := snowforecastApiClient.GetSnowfallForecastBySkiResortSearchWord(snowResort.SearchKey)
 	if err != nil {
 		return "", err
 	}
 
 	// TODO: 仮の文章
-	content := snowResort.Label + "\n"
+	content := snowResort.Name + "\n"
 	content += "今日 | 明日 | 明後日\n"
 	content += "3日後 | 4日後 | 5日後\n"
 	content += strconv.Itoa(snowfallForecast.Snows[0].Morning) + addRainyChar(snowfallForecast.Rains[0].Morning) + ", " + strconv.Itoa(snowfallForecast.Snows[0].Noon) + addRainyChar(snowfallForecast.Rains[0].Noon) + ", " + strconv.Itoa(snowfallForecast.Snows[0].Night) + addRainyChar(snowfallForecast.Rains[0].Night) + "cm | "
@@ -157,39 +163,37 @@ func toHiragana(str string, yahooApiClient yahoo.IYahooApiClient) string {
 	return h
 }
 
-func getSimilarSkiResort(target string, skiresorts []string) string {
+func getSimilarSnowResort(target string, snowResorts []*SnowResort) *SnowResort {
 	// targetは小文字にしておく
 	target = strings.ToLower(target)
+
+	// TODO: []*SnowResortから*SnowResortを返す便利メソッド
+	// elastic searchみたいに順に処理を行う
 
 	// レーベンシュタイン距離を計算する際の重みづけ
 	// 削除の際の距離を小さくしている
 	// TODO: 標準化や他の編集距離を考える必要もある、その際に評価をするためにラベル付おじさんにならないといけないかもしれない
-	myOptions := levenshtein.Options{
-		InsCost: 10,
-		DelCost: 1,
-		SubCost: 10,
-		Matches: levenshtein.IdenticalRunes,
-	}
-	distances := make([]int, len(skiresorts))
-	for i := 0; i < len(skiresorts); i++ {
-		distances[i] = levenshtein.DistanceForStrings([]rune(skiresorts[i]), []rune(target), myOptions)
-	}
+	// myOptions := levenshtein.Options{
+	// 	InsCost: 10,
+	// 	DelCost: 1,
+	// 	SubCost: 10,
+	// 	Matches: levenshtein.IdenticalRunes,
+	// }
+	// distances := make([]int, len(skiresorts))
+	// for i := 0; i < len(skiresorts); i++ {
+	// 	distances[i] = levenshtein.DistanceForStrings([]rune(skiresorts[i]), []rune(target), myOptions)
+	// }
 
 	// 距離が最小のもののインデックスを取得する
-	minIdx := 0
-	minDistance := 1000000 // 十分大きな数
-	for i := 0; i < len(distances); i++ {
-		if distances[i] <= minDistance {
-			minDistance = distances[i]
-			minIdx = i
-		}
-	}
+	// minIdx := 0
+	// minDistance := 1000000 // 十分大きな数
+	// for i := 0; i < len(distances); i++ {
+	// 	if distances[i] <= minDistance {
+	// 		minDistance = distances[i]
+	// 		minIdx = i
+	// 	}
+	// }
 
-	return skiresorts[minIdx]
-}
-
-type SnowResortRepository interface {
-	ListSnowResorts(string) ([]string, error)
-	FindSnowResort(string) (SnowResort, error)
-	SetSnowResort(string, SnowResort) error
+	// return skiresorts[minIdx]
+	return &SnowResort{}
 }
