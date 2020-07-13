@@ -17,7 +17,7 @@ import (
 
 // Injectors from injector.go:
 
-func initNewTwitterHandlerImpl(tc *twitter.TwitterConfig, yc *yahoo.YahooConfig, rc *repository.RedisConfig) (handler.TwitterHandler, error) {
+func initNewTwitterHandlerImpl(tc *twitter.TwitterConfig, yc *yahoo.YahooConfig, rc *repository.RedisConfig) (handler.ReplyHandler, error) {
 	client, err := repository.NewRedisClient(rc)
 	if err != nil {
 		return nil, err
@@ -27,9 +27,9 @@ func initNewTwitterHandlerImpl(tc *twitter.TwitterConfig, yc *yahoo.YahooConfig,
 	iTwitterApiClient := twitter.NewTwitterApiClient(tc)
 	iSnowforecastApiClient := snowforecast.NewSnowforecastApiClient()
 	snowResortService := domain.NewSnowResortServiceImpl(snowResortRepository, iYahooApiClient, iTwitterApiClient, iSnowforecastApiClient)
-	twitterUseCase := usecase.NewTwitterUseCaseImpl(snowResortService, iYahooApiClient)
-	twitterHandler := handler.NewTwitterHandlerImpl(twitterUseCase)
-	return twitterHandler, nil
+	replyUseCase := usecase.NewReplyUseCaseImpl(snowResortService, iYahooApiClient)
+	replyHandler := handler.NewReplyHandlerImpl(replyUseCase)
+	return replyHandler, nil
 }
 
 func initNewJobHandlerImpl() handler.JobHandler {

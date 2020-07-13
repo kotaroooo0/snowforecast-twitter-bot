@@ -13,7 +13,7 @@ import (
 	"github.com/kotaroooo0/snowforecast-twitter-bot/usecase"
 )
 
-func initNewTwitterHandlerImpl(tc *twitter.TwitterConfig, yc *yahoo.YahooConfig, rc *repository.RedisConfig) (handler.TwitterHandler, error) {
+func initNewTwitterHandlerImpl(tc *twitter.TwitterConfig, yc *yahoo.YahooConfig, rc *repository.RedisConfig) (handler.ReplyHandler, error) {
 	wire.Build(
 		yahoo.NewYahooApiClient,
 		twitter.NewTwitterApiClient,
@@ -21,10 +21,10 @@ func initNewTwitterHandlerImpl(tc *twitter.TwitterConfig, yc *yahoo.YahooConfig,
 		repository.NewRedisClient,
 		repository.NewSnowResortRepositoryImpl,
 		domain.NewSnowResortServiceImpl,
-		usecase.NewTwitterUseCaseImpl,
-		handler.NewTwitterHandlerImpl,
+		usecase.NewReplyUseCaseImpl,
+		handler.NewReplyHandlerImpl,
 	)
-	return &handler.TwitterHandlerImpl{}, nil
+	return &handler.ReplyHandlerImpl{}, nil
 }
 
 func initNewJobHandlerImpl() handler.JobHandler {
