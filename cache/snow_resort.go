@@ -1,9 +1,11 @@
-package redis
+package cache
 
 import (
+	"os"
 	"reflect"
+	"strconv"
 
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v7"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/domain"
 	"github.com/pkg/errors"
 )
@@ -17,9 +19,15 @@ type SnowResortCacheImpl struct {
 	Client *redis.Client
 }
 
+func NewSnowResortCacheImpl(c *redis.Client) SnowResortCache {
+	return &SnowResortCacheImpl{
+		Client: c,
+	}
+}
+
 func NewRedisClient(redisConfig *RedisConfig) (*redis.Client, error) {
 	client := redis.NewClient(&redis.Options{
-		Addr: redisConfig.Addr + ":6379",
+		Addr: redisConfig.Addr + ":" + os.Getenv("REDIS_PORT"),
 	})
 	if err := client.Ping().Err(); err != nil {
 		return nil, errors.Wrapf(err, "failed to ping redis server")
@@ -43,7 +51,21 @@ func (s SnowResortCacheImpl) Get(key string) (*domain.SnowResort, error) {
 	if err != nil {
 		return sr, err
 	}
-	toStruct(result, sr)
+
+	// map[string]string -> map[string]interface{}へ型変換
+	m := make(map[string]interface{}, len(result))
+	for k, v := range result {
+		// TODO: このロジックはリフレクションに持っていけないか
+		i, err := strconv.Atoi(v)
+		if err != nil {
+			m[k] = v
+		} else {
+			m[k] = i
+		}
+	}
+
+	// 構造体へ変換
+	toStruct(m, sr)
 	return sr, nil
 }
 
@@ -67,7 +89,7 @@ func toMap(v interface{}) map[string]interface{} {
 	return m
 }
 
-func toStruct(m map[string]string, s interface{}) {
+func toStruct(m map[string]interface{}, s interface{}) {
 	rv := reflect.ValueOf(s).Elem()
 	for k, v := range m {
 		rv.FieldByName(k).Set(reflect.ValueOf(v))
