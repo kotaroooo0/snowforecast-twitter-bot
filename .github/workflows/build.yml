@@ -8,5 +8,9 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@master
+
+      - name: Create .env file
+        run: echo "${{ secrets.GITHUBACTION_ENV }}" > .env
+
       - name: Build
         run: docker build .
