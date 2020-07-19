@@ -3,15 +3,17 @@ name: build
 on: pull_request
 
 jobs:
-  build_no_cache_buildkit:
+  build_with_docker_save_load:
     runs-on: ubuntu-18.04
     steps:
-      - uses: actions/checkout@master
-
-      - name: Create .env file
-        run: echo "${{ secrets.GITHUBACTION_ENV }}" > .env
-
-      - name: Build
-        env:
-          DOCKER_BUILDKIT: 1
-        run: docker build .
+    - uses: actions/checkout@master
+    - id: cache-docker
+      uses: actions/cache@v1
+      with:
+        path: /tmp/docker-save
+        key: docker-save-${{ hashFiles('Dockerfile') }}
+    - run: docker load -i /tmp/docker-save/snapshot.tar || true
+      if: steps.cache-docker.outputs.cache-hit == 'true'
+    - run: docker build . -t thing --cache-from=thing-cache
+    - run: docker tag thing thing-cache && mkdir -p /tmp/docker-save && docker save thing-cache -o /tmp/docker-save/snapshot.tar && ls -lh /tmp/docker-save || true
+      if: always() && steps.cache-docker.outputs.cache-hit != 'true'
