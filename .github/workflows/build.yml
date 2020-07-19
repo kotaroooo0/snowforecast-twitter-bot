@@ -3,8 +3,7 @@ name: build
 on: pull_request
 
 jobs:
-  # ベースライン
-  build_no_cache:
+  build_no_cache_buildkit:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@master
@@ -13,4 +12,6 @@ jobs:
         run: echo "${{ secrets.GITHUBACTION_ENV }}" > .env
 
       - name: Build
+        env:
+          DOCKER_BUILDKIT: 1
         run: docker build .
