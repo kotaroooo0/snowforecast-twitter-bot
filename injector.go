@@ -4,6 +4,7 @@ package main
 
 import (
 	"github.com/google/wire"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/cache"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/domain"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/handler"
 	repository "github.com/kotaroooo0/snowforecast-twitter-bot/infrastructure"
@@ -13,14 +14,14 @@ import (
 	"github.com/kotaroooo0/snowforecast-twitter-bot/usecase"
 )
 
-func initNewTwitterHandlerImpl(tc *twitter.TwitterConfig, yc *yahoo.YahooConfig, rc *repository.RedisConfig) (handler.ReplyHandler, error) {
+func initNewTwitterHandlerImpl(tc *twitter.TwitterConfig, yc *yahoo.YahooConfig, rc *cache.RedisConfig) (handler.ReplyHandler, error) {
 	wire.Build(
-		yahoo.NewYahooApiClient,
 		twitter.NewTwitterApiClient,
+		yahoo.NewYahooApiClient,
 		snowforecast.NewSnowforecastApiClient,
-		repository.NewRedisClient,
+		cache.NewRedisClient,
 		repository.NewSnowResortRepositoryImpl,
-		domain.NewSnowResortServiceImpl,
+		domain.NewReplyServiceImpl,
 		usecase.NewReplyUseCaseImpl,
 		handler.NewReplyHandlerImpl,
 	)

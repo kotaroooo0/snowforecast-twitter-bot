@@ -71,7 +71,7 @@ type ReplyServiceImpl struct {
 
 func testClient() (*redis.Client, error) {
 	client := redis.NewClient(&redis.Options{
-		Addr: os.Getenv("REDIS_HOST") + ":6379",
+		Addr: os.Getenv("REDIS_HOST") + ":" + os.Getenv("REDIS_PORT"),
 		DB:   1, // 1のDBをテスト用とする
 	})
 	if err := client.Ping().Err(); err != nil {
@@ -107,6 +107,7 @@ func (s *SnowResortRepositoryMock) SetSnowResort(key string, snowResort SnowReso
 	err := s.Client.HMSet(key, map[string]interface{}{"search_word": snowResort.SearchWord, "label": snowResort.Label})
 	return err.Err()
 }
+
 func TestGetSimilarSnowResortFromReply(t *testing.T) {
 	before()
 

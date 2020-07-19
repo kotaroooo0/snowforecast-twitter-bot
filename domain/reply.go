@@ -34,7 +34,7 @@ type Tweet struct {
 }
 
 type ReplyService interface {
-	ReplyForecast(*SnowResort, *Tweet) (*SnowResort, error)
+	ReplyForecast(*Tweet) (*SnowResort, error)
 }
 
 type ReplyServiceImpl struct {
@@ -45,7 +45,7 @@ type ReplyServiceImpl struct {
 	SnowforecastApiClient snowforecast.ISnowforecastApiClient
 }
 
-func NewReplyServiceImpl(snowResortRepository SnowResortRepository, yahooApiClient yahoo.IYahooApiClient, twitterApiClient twitter.ITwitterApiClient, snowforecastApiClient snowforecast.ISnowforecastApiClient) SnowResortService {
+func NewReplyServiceImpl(snowResortRepository SnowResortRepository, yahooApiClient yahoo.IYahooApiClient, twitterApiClient twitter.ITwitterApiClient, snowforecastApiClient snowforecast.ISnowforecastApiClient) ReplyService {
 	return &ReplyServiceImpl{
 		SnowResortRepository:  snowResortRepository,
 		YahooApiClient:        yahooApiClient,
