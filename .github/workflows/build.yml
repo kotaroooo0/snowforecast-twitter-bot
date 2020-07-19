@@ -1,0 +1,12 @@
+name: build
+
+on: pull_request
+
+jobs:
+  # ベースライン
+  build_no_cache:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@master
+      - name: Build
+        run: docker build .
