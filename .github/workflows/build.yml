@@ -36,7 +36,7 @@ jobs:
         IMAGE: adachikun/snowforecast-twitter-bot
       run: |
         docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
-        docker build --target base --cache-from $IMAGE:base --tag $IMAGE:base --build-arg BUILDKIT_INLINE_CACHE=1 .
-        docker build --cache-from $IMAGE:base --cache-from $IMAGE:latest --tag $IMAGE:latest --build-arg BUILDKIT_INLINE_CACHE=1 .
-        docker push $IMAGE:base
+        docker build --target builder --cache-from $IMAGE:builder --tag $IMAGE:builder --build-arg BUILDKIT_INLINE_CACHE=1 .
+        docker build --cache-from $IMAGE:builder --cache-from $IMAGE:latest --tag $IMAGE:latest --build-arg BUILDKIT_INLINE_CACHE=1 .
+        docker push $IMAGE:builder
         docker push $IMAGE:latest
