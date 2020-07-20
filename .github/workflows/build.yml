@@ -28,7 +28,6 @@ jobs:
     - uses: actions/checkout@master
     - name: Create .env file
       run: echo "${{ secrets.GITHUBACTION_ENV }}" > .env
-    - uses: actions/checkout@master
     - name: Build and Push
       env:
         DOCKER_BUILDKIT: 1
