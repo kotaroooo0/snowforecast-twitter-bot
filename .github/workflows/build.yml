@@ -2,6 +2,11 @@ name: build
 
 on: pull_request
 
+env:
+  DOCKER_BUILDKIT: 1
+  DOCKERHUB_USER: ${{ secrets.DOCKER_USERNAME }}
+  DOCKERHUB_PASS: ${{ secrets.DOCKER_PASSWORD }}
+  IMAGE: adachikun/snowforecast-twitter-bot
 
 jobs:
 
@@ -21,12 +26,6 @@ jobs:
 #    - run: docker build . -t thing --cache-from=thing-cache
 #    - run: docker tag thing thing-cache && mkdir -p /tmp/docker-save && docker save thing-cache -o /tmp/docker-save/snapshot.tar && ls -lh /tmp/docker-save || true
 #      if: always() && steps.cache-docker.outputs.cache-hit != 'true'
-
-  env:
-    DOCKER_BUILDKIT: 1
-    DOCKERHUB_USER: ${{ secrets.DOCKER_USERNAME }}
-    DOCKERHUB_PASS: ${{ secrets.DOCKER_PASSWORD }}
-    IMAGE: adachikun/snowforecast-twitter-bot
 
   cache-from-with-build-arg:
     runs-on: ubuntu-18.04
