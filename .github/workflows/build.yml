@@ -40,20 +40,19 @@ jobs:
    - id: cache-docker
      uses: actions/cache@v1
      with:
-       path: /tmp/docker-save
-       key: docker-save-${{ hashFiles('Dockerfile') }}
+       path: /tmp/docker-cache
+       key: docker-cache-${{ hashFiles('Dockerfile') }}
    - run: |
-      docker load -i /tmp/docker-save/builder.tar || true &
-      docker load -i /tmp/docker-save/latest.tar || true &
+      docker load -i /tmp/docker-cache/builder.tar || true &
+      docker load -i /tmp/docker-cache/latest.tar || true &
       wait &
      if: steps.cache-docker.outputs.cache-hit == 'true'
    - run: docker build . -t builder --cache-from=builder-cache
    - run: docker build . -t latest --cache-from=latest-cache --cache-from=builder-cache
    - run: |
-      docker tag builder builder-cache && mkdir -p /tmp/docker-save && docker save builder-cache -o /tmp/docker-save/builder.tar && ls -lh /tmp/docker-save || true &
-      docker tag latest latest-cache && mkdir -p /tmp/docker-save && docker save latest-cache -o /tmp/docker-save/latest.tar && ls -lh /tmp/docker-save || true
+      docker tag builder builder-cache && mkdir -p /tmp/docker-cache && docker save builder-cache -o /tmp/docker-cache/builder.tar && ls -lh /tmp/docker-cache || true &
+      docker tag latest latest-cache && mkdir -p /tmp/docker-cache && docker save latest-cache -o /tmp/docker-cache/latest.tar && ls -lh /tmp/docker-cache || true
       wait
-
 
   # cache-from-with-build-arg:
   #   runs-on: ubuntu-18.04
