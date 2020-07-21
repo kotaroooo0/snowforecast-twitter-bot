@@ -35,30 +35,24 @@ jobs:
    runs-on: ubuntu-18.04
    steps:
    - uses: actions/checkout@master
-
    - name: Create .env file
      run: echo "${{ secrets.GITHUBACTION_ENV }}" > .env
-
    - id: cache-docker
      uses: actions/cache@v1
      with:
        path: /tmp/docker-save
        key: docker-save-${{ hashFiles('Dockerfile') }}
-
-   - run: docker load -i /tmp/docker-save/builder.tar || true
+   - run: |
+      docker load -i /tmp/docker-save/builder.tar || true &
+      docker load -i /tmp/docker-save/latest.tar || true &
+      wait &
      if: steps.cache-docker.outputs.cache-hit == 'true'
-
    - run: docker build . -t builder --cache-from=builder-cache
-
-   - run: docker tag builder builder-cache && mkdir -p /tmp/docker-save && docker save builder-cache -o /tmp/docker-save/builder.tar && ls -lh /tmp/docker-save || true
-     if: always() && steps.cache-docker.outputs.cache-hit != 'true'
-
-   - run: docker load -i /tmp/docker-save/latest.tar || true
-     if: steps.cache-docker.outputs.cache-hit == 'true'
-
-   - run: docker build . -t latest --cache-from=latest-cache
-
-   - run: docker tag latest latest-cache && mkdir -p /tmp/docker-save && docker save latest-cache -o /tmp/docker-save/latest.tar && ls -lh /tmp/docker-save || true
+   - run: docker build . -t latest --cache-from=latest-cache --cache-from=builder-cache
+   - run: |
+      docker tag builder builder-cache && mkdir -p /tmp/docker-save && docker save builder-cache -o /tmp/docker-save/builder.tar && ls -lh /tmp/docker-save || true &
+      docker tag latest latest-cache && mkdir -p /tmp/docker-save && docker save latest-cache -o /tmp/docker-save/latest.tar && ls -lh /tmp/docker-save || true
+      wait
      if: always() && steps.cache-docker.outputs.cache-hit != 'true'
 
 
