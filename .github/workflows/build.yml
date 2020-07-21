@@ -53,7 +53,6 @@ jobs:
       docker tag builder builder-cache && mkdir -p /tmp/docker-save && docker save builder-cache -o /tmp/docker-save/builder.tar && ls -lh /tmp/docker-save || true &
       docker tag latest latest-cache && mkdir -p /tmp/docker-save && docker save latest-cache -o /tmp/docker-save/latest.tar && ls -lh /tmp/docker-save || true
       wait
-     if: always() && steps.cache-docker.outputs.cache-hit != 'true'
 
 
   # cache-from-with-build-arg:
