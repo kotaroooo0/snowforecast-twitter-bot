@@ -22,21 +22,39 @@ jobs:
 #    - run: docker tag thing thing-cache && mkdir -p /tmp/docker-save && docker save thing-cache -o /tmp/docker-save/snapshot.tar && ls -lh /tmp/docker-save || true
 #      if: always() && steps.cache-docker.outputs.cache-hit != 'true'
 
+  env:
+    DOCKER_BUILDKIT: 1
+    DOCKERHUB_USER: ${{ secrets.DOCKER_USERNAME }}
+    DOCKERHUB_PASS: ${{ secrets.DOCKER_PASSWORD }}
+    IMAGE: adachikun/snowforecast-twitter-bot
+
   cache-from-with-build-arg:
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@master
+
     - name: Create .env file
       run: echo "${{ secrets.GITHUBACTION_ENV }}" > .env
-    - name: Build and Push
-      env:
-        DOCKER_BUILDKIT: 1
-        DOCKERHUB_USER: ${{ secrets.DOCKER_USERNAME }}
-        DOCKERHUB_PASS: ${{ secrets.DOCKER_PASSWORD }}
-        IMAGE: adachikun/snowforecast-twitter-bot
-      run: |
-        docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
-        docker build --target builder --cache-from $IMAGE:builder --tag $IMAGE:builder --build-arg BUILDKIT_INLINE_CACHE=1 .
-        docker build --cache-from $IMAGE:builder --cache-from $IMAGE:latest --tag $IMAGE:latest --build-arg BUILDKIT_INLINE_CACHE=1 .
-        docker push $IMAGE:builder
-        docker push $IMAGE:latest
+
+    - name: login
+      run: docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
+
+    - name: build builder image
+      run: docker build --target builder --cache-from $IMAGE:builder --tag $IMAGE:builder --build-arg BUILDKIT_INLINE_CACHE=1 .
+
+    - name: build image
+      run: docker build --cache-from $IMAGE:builder --cache-from $IMAGE:latest --tag $IMAGE:latest --build-arg BUILDKIT_INLINE_CACHE=1 .
+
+    - name: push builder image
+      run: docker push $IMAGE:builder
+
+    - name: push image
+      run: docker push $IMAGE:latest
+
+#    - name: Build and Push
+#      run: |
+#        docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
+#        docker build --target builder --cache-from $IMAGE:builder --tag $IMAGE:builder --build-arg BUILDKIT_INLINE_CACHE=1 .
+#        docker build --cache-from $IMAGE:builder --cache-from $IMAGE:latest --tag $IMAGE:latest --build-arg BUILDKIT_INLINE_CACHE=1 .
+#        docker push $IMAGE:builder
+#        docker push $IMAGE:latest
