@@ -10,57 +10,77 @@ env:
 
 jobs:
 
-#  build_with_docker_save_load:
-#    runs-on: ubuntu-18.04
-#    steps:
-#    - uses: actions/checkout@master
-#    - name: Create .env file
-#      run: echo "${{ secrets.GITHUBACTION_ENV }}" > .env
-#    - id: cache-docker
-#      uses: actions/cache@v1
-#      with:
-#        path: /tmp/docker-save
-#        key: docker-save-${{ hashFiles('Dockerfile') }}
-#    - run: docker load -i /tmp/docker-save/snapshot.tar || true
-#      if: steps.cache-docker.outputs.cache-hit == 'true'
-#    - run: docker build . -t thing --cache-from=thing-cache
-#    - run: docker tag thing thing-cache && mkdir -p /tmp/docker-save && docker save thing-cache -o /tmp/docker-save/snapshot.tar && ls -lh /tmp/docker-save || true
-#      if: always() && steps.cache-docker.outputs.cache-hit != 'true'
+  # build_no_cache:
+  #   runs-on: ubuntu-18.04
+  #   steps:
+  #     - uses: actions/checkout@master
+  #     - name: Create .env file
+  #       run: echo "${{ secrets.GITHUBACTION_ENV }}" > .env
+  #     - name: Build
+  #       run: docker build .
 
-  cache-from-with-build-arg:
-    runs-on: ubuntu-18.04
-    steps:
-    - uses: actions/checkout@master
-
-    - name: Create .env file
-      run: echo "${{ secrets.GITHUBACTION_ENV }}" > .env
-
-    - name: login
-      run: docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
-
-    - name: pull image
-      run: |
-        docker pull $IMAGE:builder || true &
-        docker pull $IMAGE:latest || true &
-        wait
-
-    - name: build builder image
-      run: docker build --target builder --cache-from $IMAGE:builder --tag $IMAGE:builder --build-arg BUILDKIT_INLINE_CACHE=1 .
-
-    - name: build image
-      run: docker build --cache-from $IMAGE:builder --cache-from $IMAGE:latest --tag $IMAGE:latest --build-arg BUILDKIT_INLINE_CACHE=1 .
-
-    - name: push image
-      run: |
-        docker push $IMAGE:builder &
-        docker push $IMAGE:latest &
-        wait
+  # build_no_cache_buildkit:
+  #   runs-on: ubuntu-18.04
+  #   steps:
+  #     - uses: actions/checkout@master
+  #     - name: Create .env file
+  #       run: echo "${{ secrets.GITHUBACTION_ENV }}" > .env
+  #     - name: Build
+  #       env:
+  #         DOCKER_BUILDKIT: 1
+  #       run: docker build .
 
 
-#    - name: Build and Push
-#      run: |
-#        docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
-#        docker build --target builder --cache-from $IMAGE:builder --tag $IMAGE:builder --build-arg BUILDKIT_INLINE_CACHE=1 .
-#        docker build --cache-from $IMAGE:builder --cache-from $IMAGE:latest --tag $IMAGE:latest --build-arg BUILDKIT_INLINE_CACHE=1 .
-#        docker push $IMAGE:builder
-#        docker push $IMAGE:latest
+ build_with_docker_save_load:
+   runs-on: ubuntu-18.04
+   steps:
+   - uses: actions/checkout@master
+
+   - name: Create .env file
+     run: echo "${{ secrets.GITHUBACTION_ENV }}" > .env
+
+     - id: cache-docker
+     uses: actions/cache@v1
+     with:
+       path: /tmp/docker-save
+       key: docker-save-${{ hashFiles('Dockerfile') }}
+
+   - run: docker load -i /tmp/docker-save/builder.tar || true
+     if: steps.cache-docker.outputs.cache-hit == 'true'
+
+   - run: docker build . -t builder --cache-from=builder-cache
+
+   - run: docker tag builder builder-cache && mkdir -p /tmp/docker-save && docker save builder-cache -o /tmp/docker-save/builder.tar && ls -lh /tmp/docker-save || true
+     if: always() && steps.cache-docker.outputs.cache-hit != 'true'
+
+   - run: docker load -i /tmp/docker-save/latest.tar || true
+     if: steps.cache-docker.outputs.cache-hit == 'true'
+
+   - run: docker build . -t latest --cache-from=latest-cache
+
+   - run: docker tag latest latest-cache && mkdir -p /tmp/docker-save && docker save latest-cache -o /tmp/docker-save/latest.tar && ls -lh /tmp/docker-save || true
+     if: always() && steps.cache-docker.outputs.cache-hit != 'true'
+
+
+  # cache-from-with-build-arg:
+  #   runs-on: ubuntu-18.04
+  #   steps:
+  #   - uses: actions/checkout@master
+  #   - name: Create .env file
+  #     run: echo "${{ secrets.GITHUBACTION_ENV }}" > .env
+  #   - name: login
+  #     run: docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
+  #   - name: pull image
+  #     run: |
+  #       docker pull $IMAGE:builder || true &
+  #       docker pull $IMAGE:latest || true &
+  #       wait
+  #   - name: build builder image
+  #     run: docker build --target builder --cache-from $IMAGE:builder --tag $IMAGE:builder --build-arg BUILDKIT_INLINE_CACHE=1 .
+  #   - name: build image
+  #     run: docker build --cache-from $IMAGE:builder --cache-from $IMAGE:latest --tag $IMAGE:latest --build-arg BUILDKIT_INLINE_CACHE=1 .
+  #   - name: push image
+  #     run: |
+  #       docker push $IMAGE:builder &
+  #       docker push $IMAGE:latest &
+  #       wait
