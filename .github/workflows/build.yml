@@ -38,11 +38,17 @@ jobs:
     - name: login
       run: docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
 
-    - name: pull builder image
-      run: docker pull $IMAGE:builder || true
+    # - name: pull builder image
+    #   run: docker pull $IMAGE:builder || true
+
+    # - name: pull image
+    #   run: docker pull $IMAGE:latest || true
 
     - name: pull image
-      run: docker pull $IMAGE:latest || true
+      run: |
+        docker pull $IMAGE:builder || true &
+        docker pull $IMAGE:latest || true &
+        wait
 
     - name: build builder image
       run: docker build --target builder --cache-from $IMAGE:builder --tag $IMAGE:builder --build-arg BUILDKIT_INLINE_CACHE=1 .
@@ -50,11 +56,18 @@ jobs:
     - name: build image
       run: docker build --cache-from $IMAGE:builder --cache-from $IMAGE:latest --tag $IMAGE:latest --build-arg BUILDKIT_INLINE_CACHE=1 .
 
-    - name: push builder image
-      run: docker push $IMAGE:builder
+    # - name: push builder image
+    #   run: docker push $IMAGE:builder
+
+    # - name: push image
+    #   run: docker push $IMAGE:latest
 
     - name: push image
-      run: docker push $IMAGE:latest
+      run: |
+        docker push $IMAGE:builder &
+        docker push $IMAGE:latest &
+        wait
+
 
 #    - name: Build and Push
 #      run: |
