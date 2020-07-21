@@ -46,8 +46,8 @@ jobs:
       docker load -i /tmp/cache/output.tar || true &
       wait
      if: steps.cache-docker.outputs.cache-hit == 'true'
-   - run: docker build -t builder --cache-from=builder-cache:latest .
-   - run: docker build -t output --cache-from=output-cache:latest --cache-from=builder-cache:latest .
+   - run: docker build -t builder .
+   - run: docker build -t output .
    - run: |
       docker tag builder builder-cache && mkdir -p /tmp/cache && docker save builder-cache -o /tmp/cache/builder.tar && ls -lh /tmp/cache || true &
       docker tag output output-cache && mkdir -p /tmp/cache && docker save output-cache -o /tmp/cache/output.tar && ls -lh /tmp/cache || true &
