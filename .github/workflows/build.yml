@@ -39,7 +39,7 @@ jobs:
    - name: Create .env file
      run: echo "${{ secrets.GITHUBACTION_ENV }}" > .env
 
-     - id: cache-docker
+   - id: cache-docker
      uses: actions/cache@v1
      with:
        path: /tmp/docker-save
