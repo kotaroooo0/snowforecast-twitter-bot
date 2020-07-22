@@ -3,7 +3,7 @@ name: build
 on: pull_request
 
 env:
-  DOCKER_BUILDKIT: 1
+  # DOCKER_BUILDKIT: 1
   DOCKERHUB_USER: ${{ secrets.DOCKER_USERNAME }}
   DOCKERHUB_PASS: ${{ secrets.DOCKER_PASSWORD }}
   IMAGE: adachikun/snowforecast-twitter-bot
