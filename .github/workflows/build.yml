@@ -63,7 +63,7 @@ jobs:
    - run: docker load -i /tmp/docker-save/snapshot.tar || true
      if: steps.cache-docker.outputs.cache-hit == 'true'
 
-   - run: docker build . -t thing --cache-from=thing-cache
+   - run: docker build --target builder -t thing --cache-from=thing-cache .
    - run: docker build .
 
    - run: docker tag thing thing-cache && mkdir -p /tmp/docker-save && docker save thing-cache -o /tmp/docker-save/snapshot.tar && ls -lh /tmp/docker-save || true
