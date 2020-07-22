@@ -36,7 +36,6 @@ func setupRouter() *gin.Engine {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	jobHandler := initNewJobHandlerImpl()
 
 	r := gin.Default()
