@@ -3,7 +3,7 @@ name: build
 on: pull_request
 
 env:
-  # DOCKER_BUILDKIT: 1
+  DOCKER_BUILDKIT: 1
   DOCKERHUB_USER: ${{ secrets.DOCKER_USERNAME }}
   DOCKERHUB_PASS: ${{ secrets.DOCKER_PASSWORD }}
   IMAGE: adachikun/snowforecast-twitter-bot
@@ -44,19 +44,15 @@ jobs:
        key: cache-${{ hashFiles('Dockerfile') }}
 
    - run: |
-      docker load -i /tmp/cache/builder.tar || true &
-      docker load -i /tmp/cache/output.tar || true &
-      wait
+      docker load -i /tmp/cache/builder.tar || true
      if: steps.cache-docker.outputs.cache-hit == 'true'
 
-   - run: docker build --target builder -t builder .
+   - run: docker build --target builder -t builder --cache-from=builder .
 
-   - run: docker build -t output .
+   - run: docker build .
 
    - run: |
-      mkdir -p /tmp/cache && docker save builder -o /tmp/cache/builder.tar && ls -lh /tmp/cache || true &
-      mkdir -p /tmp/cache && docker save output -o /tmp/cache/output.tar && ls -lh /tmp/cache || true &
-      wait
+      mkdir -p /tmp/cache && docker save builder -o /tmp/cache/builder.tar && ls -lh /tmp/cache || true
 
   #  - id: cache-docker
   #    uses: actions/cache@v1
