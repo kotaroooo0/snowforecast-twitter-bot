@@ -30,43 +30,43 @@ jobs:
   #         DOCKER_BUILDKIT: 1
   #       run: docker build .
 
-#  build_with_docker_save_load:
-#    runs-on: ubuntu-18.04
-#    steps:
-#    - uses: actions/checkout@master
-#    - name: Create .env file
-#      run: echo "${{ secrets.GITHUBACTION_ENV }}" > .env
-#    - id: cache-docker
-#      uses: actions/cache@v1
-#      with:
-#        path: /tmp/cache
-#        key: cache-${{ hashFiles('Dockerfile') }}
-#    - run: |
-#       docker load -i /tmp/cache/builder.tar || true &
-#       docker load -i /tmp/cache/output.tar || true &
-#       wait
-#      if: steps.cache-docker.outputs.cache-hit == 'true'
-#    - run: docker build -t builder .
-#    - run: docker build -t output .
-#    - run: |
-#       docker tag builder builder-cache && mkdir -p /tmp/cache && docker save builder-cache -o /tmp/cache/builder.tar && ls -lh /tmp/cache || true &
-#       docker tag output output-cache && mkdir -p /tmp/cache && docker save output-cache -o /tmp/cache/output.tar && ls -lh /tmp/cache || true &
-#       wait
+ build_with_docker_save_load:
+   runs-on: ubuntu-18.04
+   steps:
+   - uses: actions/checkout@master
+   - name: Create .env file
+     run: echo "${{ secrets.GITHUBACTION_ENV }}" > .env
+   - id: cache-docker
+     uses: actions/cache@v1
+     with:
+       path: /tmp/cache
+       key: cache-${{ hashFiles('Dockerfile') }}
+   - run: |
+      docker load -i /tmp/cache/builder.tar || true &
+      docker load -i /tmp/cache/output.tar || true &
+      wait
+     if: steps.cache-docker.outputs.cache-hit == 'true'
+   - run: docker build -t builder .
+   - run: docker build -t output .
+   - run: |
+      mkdir -p /tmp/cache && docker save builder -o /tmp/cache/builder.tar && ls -lh /tmp/cache || true &
+      mkdir -p /tmp/cache && docker save output -o /tmp/cache/output.tar && ls -lh /tmp/cache || true &
+      wait
 
-  cache-from-with-build-arg:
-    runs-on: ubuntu-18.04
-    steps:
-    - uses: actions/checkout@master
-    - name: Create .env file
-      run: echo "${{ secrets.GITHUBACTION_ENV }}" > .env
-    - name: login
-      run: docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
-    - name: build builder image
-      run: docker build --target builder --cache-from $IMAGE:builder --tag $IMAGE:builder --build-arg BUILDKIT_INLINE_CACHE=1 .
-    - name: build image
-      run: docker build --cache-from $IMAGE:builder --cache-from $IMAGE:latest --tag $IMAGE:latest --build-arg BUILDKIT_INLINE_CACHE=1 .
-    - name: push image
-      run: |
-        docker push $IMAGE:builder &
-        docker push $IMAGE:latest &
-        wait
+  # cache-from-with-build-arg:
+  #   runs-on: ubuntu-18.04
+  #   steps:
+  #   - uses: actions/checkout@master
+  #   - name: Create .env file
+  #     run: echo "${{ secrets.GITHUBACTION_ENV }}" > .env
+  #   - name: login
+  #     run: docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
+  #   - name: build builder image
+  #     run: docker build --target builder --cache-from $IMAGE:builder --tag $IMAGE:builder --build-arg BUILDKIT_INLINE_CACHE=1 .
+  #   - name: build image
+  #     run: docker build --cache-from $IMAGE:builder --cache-from $IMAGE:latest --tag $IMAGE:latest --build-arg BUILDKIT_INLINE_CACHE=1 .
+  #   - name: push image
+  #     run: |
+  #       docker push $IMAGE:builder &
+  #       docker push $IMAGE:latest &
+  #       wait
