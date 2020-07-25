@@ -1,14 +1,15 @@
 package main
 
 import (
+	"log"
+	"os"
+
 	"github.com/bamzi/jobrunner"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	repository "github.com/kotaroooo0/snowforecast-twitter-bot/infrastructure"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/twitter"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/yahoo"
-	"log"
-	"os"
 )
 
 func envLoad() {
@@ -27,8 +28,8 @@ func setupBatch() {
 }
 
 func setupRouter() *gin.Engine {
-	twitterHandler,err := initNewTwitterHandlerImpl(
-		twitter.NewTwitterConfig(os.Getenv("CONSUMER_KEY"),os.Getenv("CONSUMER_SECRET"),os.Getenv("ACCESS_TOKEN_KEY"),os.Getenv("ACCESS_TOKEN_SECRET")),
+	twitterHandler, err := initNewTwitterHandlerImpl(
+		twitter.NewTwitterConfig(os.Getenv("CONSUMER_KEY"), os.Getenv("CONSUMER_SECRET"), os.Getenv("ACCESS_TOKEN_KEY"), os.Getenv("ACCESS_TOKEN_SECRET")),
 		yahoo.NewYahooConfig(os.Getenv("YAHOO_APP_ID")),
 		repository.NewRedisConfig(os.Getenv("REDIS_HOST")),
 	)
