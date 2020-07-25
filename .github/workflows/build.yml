@@ -41,15 +41,17 @@ jobs:
    - id: cache-docker
      uses: actions/cache@v1
      with:
-       path: /tmp/docker-save1234
+       path: /tmp/save-load-cache
        key: docker-${{ hashFiles('Dockerfile') }}
 
-   - run: docker load -i /tmp/docker-save1234/snapshot1234.tar || true
+   - run: docker load -i /tmp/save-load-cache/go-builder.tar || true
      if: steps.cache-docker.outputs.cache-hit == 'true'
 
    - run: docker build . -t thing --target builder --cache-from=thing-cache
 
-   - run: docker tag thing thing-cache && mkdir -p /tmp/docker-save1234 && docker save thing-cache -o /tmp/docker-save1234/snapshot1234.tar && ls -lh /tmp/docker-save1234 || true
+   - run: docker build .
+
+   - run: docker tag thing thing-cache && mkdir -p /tmp/save-load-cache && docker save thing-cache -o /tmp/save-load-cache/go-builder.tar && ls -lh /tmp/save-load-cache || true
      if: always() && steps.cache-docker.outputs.cache-hit != 'true'
 
 
