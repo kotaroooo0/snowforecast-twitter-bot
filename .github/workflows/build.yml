@@ -65,25 +65,24 @@ jobs:
   #  - run: docker load -i /tmp/docker-save/snapshot.tar || true
   #    if: steps.cache-docker.outputs.cache-hit == 'true'
 
-  #  - run: docker build --target builder -t thing --cache-from=thing-cache .
-  #  - run: docker build .
+   - run: docker build --target builder -t thing --cache-from=thing-cache .
+   - run: docker build .
 
   #  - run: docker tag thing thing-cache && mkdir -p /tmp/docker-save && docker save thing-cache -o /tmp/docker-save/snapshot.tar && ls -lh /tmp/docker-save || true
       # if: always() && steps.cache-docker.outputs.cache-hit != 'true'
+   - id: cache-docker
+     uses: actions/cache@v1
+     with:
+       path: /tmp/docker-save
+       key: docker-save-${{ hashFiles('Dockerfile') }}
 
-    - id: cache-docker
-      uses: actions/cache@v1
-      with:
-        path: /tmp/docker-save
-        key: docker-save-${{ hashFiles('Dockerfile') }}
+   - run: docker load -i /tmp/docker-save/snapshot.tar || true
+     if: steps.cache-docker.outputs.cache-hit == 'true'
 
-    - run: docker load -i /tmp/docker-save/snapshot.tar || true
-      if: steps.cache-docker.outputs.cache-hit == 'true'
+   - run: docker build . -t thing --target builder --cache-from=thing-cache
 
-    - run: docker build . -t thing --target builder --cache-from=thing-cache
-
-    - run: docker tag thing thing-cache && mkdir -p /tmp/docker-save && docker save thing-cache -o /tmp/docker-save/snapshot.tar && ls -lh /tmp/docker-save || true
-      if: always() && steps.cache-docker.outputs.cache-hit != 'true'
+   - run: docker tag thing thing-cache && mkdir -p /tmp/docker-save && docker save thing-cache -o /tmp/docker-save/snapshot.tar && ls -lh /tmp/docker-save || true
+     if: always() && steps.cache-docker.outputs.cache-hit != 'true'
 
 
   # cache-from-with-build-arg:
