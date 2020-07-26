@@ -8,14 +8,14 @@ env:
   IMAGE: adachikun/snowforecast-twitter-bot
 
 jobs:
-#   build_no_cache:
-#     runs-on: ubuntu-18.04
-#     steps:
-#       - uses: actions/checkout@master
-#       - name: Create .env file
-#         run: echo "${{ secrets.GITHUBACTION_ENV }}" > .env
-#       - name: Build
-#         run: docker build .
+  # build_no_cache:
+  #   runs-on: ubuntu-18.04
+  #   steps:
+  #     - uses: actions/checkout@master
+  #     - name: Create .env file
+  #       run: echo "${{ secrets.GITHUBACTION_ENV }}" > .env
+  #     - name: Build
+  #       run: docker build .
 
   build_no_cache_buildkit:
     runs-on: ubuntu-18.04
@@ -47,8 +47,8 @@ jobs:
 #    - run: docker build . --cache-from=thing-cache
 #    - run: docker tag thing thing-cache && mkdir -p /tmp/saveload-cache && docker save thing-cache -o /tmp/saveload-cache/go-builder.tar && ls -lh /tmp/saveload-cache || true
 #      if: always() && steps.docker-cache-step.outputs.cache-hit != 'true'
-#
-#
+
+
 #   cache-from-with-build-arg:
 #     runs-on: ubuntu-18.04
 #     steps:
@@ -58,8 +58,12 @@ jobs:
 #     - name: login
 #       run: docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
 #     - name: build builder image
+#       env:
+#         DOCKER_BUILDKIT: 1
 #       run: docker build --target builder --cache-from $IMAGE:builder --tag $IMAGE:builder --build-arg BUILDKIT_INLINE_CACHE=1 .
 #     - name: build image
+#       env:
+#         DOCKER_BUILDKIT: 1
 #       run: docker build --cache-from $IMAGE:builder --cache-from $IMAGE:latest --tag $IMAGE:latest --build-arg BUILDKIT_INLINE_CACHE=1 .
 #     - name: push image
 #       run: |
