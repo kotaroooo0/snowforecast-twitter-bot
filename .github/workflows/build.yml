@@ -48,7 +48,6 @@ jobs:
 #    - run: docker tag thing thing-cache && mkdir -p /tmp/saveload-cache && docker save thing-cache -o /tmp/saveload-cache/go-builder.tar && ls -lh /tmp/saveload-cache || true
 #      if: always() && steps.docker-cache-step.outputs.cache-hit != 'true'
 
-
 #   cache-from-with-build-arg:
 #     runs-on: ubuntu-18.04
 #     steps:
