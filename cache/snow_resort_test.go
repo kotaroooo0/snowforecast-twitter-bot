@@ -39,6 +39,7 @@ func NewRedisTestClient() (*redis.Client, error) {
 	return client, nil
 }
 
+// TODO: テストデータを事前に入れておく必要がある
 func TestGet(t *testing.T) {
 	src := NewSnowResortCacheTestImpl()
 	cases := []struct {
@@ -47,11 +48,23 @@ func TestGet(t *testing.T) {
 	}{
 		{
 			k:    "白馬",
-			want: &domain.SnowResort{},
+			want: &domain.SnowResort{
+				Id:        0,
+				Name:      "Hakuba47",
+				SearchKey: "hakuba47",
+				Elevation: 1500,
+				Region:    "japan-nagano",
+			},
 		},
 		{
 			k:    "かぐら",
-			want: &domain.SnowResort{},
+			want: &domain.SnowResort{
+				Id:        12345,
+				Name:      "Kagura",
+				SearchKey: "kagura",
+				Elevation: 1600,
+				Region:    "japan-nigata",
+			},
 		},
 	}
 
