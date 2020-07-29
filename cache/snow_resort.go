@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"os"
 	"reflect"
 	"strconv"
 
@@ -27,7 +26,7 @@ func NewSnowResortCacheImpl(c *redis.Client) SnowResortCache {
 
 func NewRedisClient(redisConfig *RedisConfig) (*redis.Client, error) {
 	client := redis.NewClient(&redis.Options{
-		Addr: redisConfig.Addr + ":" + os.Getenv("REDIS_PORT"),
+		Addr: redisConfig.Addr + ":" + redisConfig.Port,
 	})
 	if err := client.Ping().Err(); err != nil {
 		return nil, errors.Wrapf(err, "failed to ping redis server")
@@ -37,11 +36,13 @@ func NewRedisClient(redisConfig *RedisConfig) (*redis.Client, error) {
 
 type RedisConfig struct {
 	Addr string
+	Port string
 }
 
-func NewRedisConfig(addr string) *RedisConfig {
+func NewRedisConfig(addr, port string) *RedisConfig {
 	return &RedisConfig{
 		Addr: addr,
+		Port: port,
 	}
 }
 

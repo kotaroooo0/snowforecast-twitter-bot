@@ -16,11 +16,11 @@ import (
 )
 
 type SnowResort struct {
-	Id        int    `db:"id" mapstructure:"id"`
-	Name      string `db:"name" mapstructure:"name"`
-	SearchKey string `db:"search_key" mapstructure:"search_key"`
-	Elevation int    `db:"elevation" mapstructure:"elevation"`
-	Region    string `db:"region" mapstructure:"region"`
+	Id        int    `db:"id"`
+	Name      string `db:"name"`
+	SearchKey string `db:"search_key"`
+	Elevation int    `db:"elevation"`
+	Region    string `db:"region"`
 }
 
 type SnowResortRepository interface {
