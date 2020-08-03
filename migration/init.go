@@ -5,16 +5,14 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"strings"
 	"sync"
 
 	"github.com/kotaroooo0/snowforecast-twitter-bot/domain"
 )
 
 func main() {
-	// redisにデータ初期化用のテキストファイル
-	// cat data.txt | redis-cli --pipe でredisにデータを挿入することを想定している
-	file, err := os.Create("data.txt")
+	// mysqlのデータ初期化用のテキストファイル
+	file, err := os.Create("data.csv")
 	if err != nil {
 		panic(err)
 	}
@@ -33,6 +31,7 @@ func main() {
 	}
 
 	// リクエスト先のサーバに負荷がかかりすぎないようにへ並行処理数を30までにする
+	m := new(sync.Mutex)
 	ch := make(chan int, 30)
 	wg := sync.WaitGroup{}
 	for _, r := range regions {
@@ -51,12 +50,9 @@ func main() {
 
 			snowResorts := parseStringToSnowResorts(string(body))
 			for i := 0; i < len(snowResorts); i++ {
-				// redisへ追加する文を出力
-				// TODO: 今は小文字にしているだけだが、さらに/や-を取り除くと平等にマッチするかもしれない
-				file.WriteString("sadd lowercase-snowresorts-searchword " + strings.ToLower(snowResorts[i].SearchKey) + "\n")
-				file.WriteString("sadd lowercase-snowresorts-label \"" + strings.ToLower(snowResorts[i].Name) + "\"\n")
-				file.WriteString(fmt.Sprintf("hmset %s search_word %s label \"%s\"\n", strings.ToLower(snowResorts[i].SearchKey), snowResorts[i].SearchKey, snowResorts[i].))
-				file.WriteString(fmt.Sprintf("hmset \"%s\" search_word %s label \"%s\"\n", strings.ToLower(snowResorts[i].), snowResorts[i].SearchKey, snowResorts[i].))
+				m.Lock()
+				file.WriteString(fmt.Sprintf("\"%s\",\"%s\"\n", snowResorts[i].Name, snowResorts[i].SearchKey))
+				m.Unlock()
 			}
 			<-ch
 			wg.Done()

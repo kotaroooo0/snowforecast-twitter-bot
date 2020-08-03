@@ -19,8 +19,6 @@ type SnowResort struct {
 	Id        int    `db:"id"`
 	Name      string `db:"name"`
 	SearchKey string `db:"search_key"`
-	Elevation int    `db:"elevation"`
-	Region    string `db:"region"`
 }
 
 type SnowResortRepository interface {

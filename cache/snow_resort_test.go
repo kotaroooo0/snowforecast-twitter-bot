@@ -47,23 +47,19 @@ func TestGet(t *testing.T) {
 		want *domain.SnowResort
 	}{
 		{
-			k:    "白馬",
+			k: "白馬",
 			want: &domain.SnowResort{
 				Id:        0,
 				Name:      "Hakuba47",
 				SearchKey: "hakuba47",
-				Elevation: 1500,
-				Region:    "japan-nagano",
 			},
 		},
 		{
-			k:    "かぐら",
+			k: "かぐら",
 			want: &domain.SnowResort{
 				Id:        12345,
 				Name:      "Kagura",
 				SearchKey: "kagura",
-				Elevation: 1600,
-				Region:    "japan-nigata",
 			},
 		},
 	}
@@ -91,8 +87,6 @@ func TestSet(t *testing.T) {
 				Id:        0,
 				Name:      "Hakuba47",
 				SearchKey: "hakuba47",
-				Elevation: 1500,
-				Region:    "japan-nagano",
 			},
 		},
 		{
@@ -101,8 +95,6 @@ func TestSet(t *testing.T) {
 				Id:        12345,
 				Name:      "Kagura",
 				SearchKey: "kagura",
-				Elevation: 1600,
-				Region:    "japan-nigata",
 			},
 		},
 	}
