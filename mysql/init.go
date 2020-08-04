@@ -12,7 +12,7 @@ import (
 
 func main() {
 	// mysqlのデータ初期化用のテキストファイル
-	file, err := os.Create("data.csv")
+	file, err := os.Create("2_insert_data.sql")
 	if err != nil {
 		panic(err)
 	}
@@ -30,6 +30,7 @@ func main() {
 		"200", "202", "203", "204", "205", "206", "207", "208", "209", "210", "211", "212", "213", "214", "215", "216", "217", "218", "219", "220", "221", "225",
 	}
 
+	file.WriteString("insert into snowforecast_twitter_bot.snow_resorts (name, search_key) values")
 	// リクエスト先のサーバに負荷がかかりすぎないようにへ並行処理数を30までにする
 	m := new(sync.Mutex)
 	ch := make(chan int, 30)
@@ -39,6 +40,7 @@ func main() {
 		wg.Add(1)
 		go func(r string) {
 			// 地域からスキー場を取得するリクエスト
+			fmt.Println(r)
 			res, err := http.Get("https://ja.snow-forecast.com/resorts/list_by_feature/" + r + "?v=2")
 			if err != nil {
 				panic(err)
@@ -51,7 +53,7 @@ func main() {
 			snowResorts := parseStringToSnowResorts(string(body))
 			for i := 0; i < len(snowResorts); i++ {
 				m.Lock()
-				file.WriteString(fmt.Sprintf("\"%s\",\"%s\"\n", snowResorts[i].Name, snowResorts[i].SearchKey))
+				file.WriteString(fmt.Sprintf("(\"%s\",\"%s\"),\n", snowResorts[i].Name, snowResorts[i].SearchKey))
 				m.Unlock()
 			}
 			<-ch
@@ -59,6 +61,9 @@ func main() {
 		}(r)
 	}
 	wg.Wait()
+	// TODO: 今は2_insert_data.sqlに手を加えないとダメ
+	// ,が末尾にあるので;に変える
+	file.WriteString(";")
 }
 
 // stringの配列から[]Snowresortを生成する
