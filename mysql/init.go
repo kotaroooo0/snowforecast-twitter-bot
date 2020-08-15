@@ -40,7 +40,6 @@ func main() {
 		wg.Add(1)
 		go func(r string) {
 			// 地域からスキー場を取得するリクエスト
-			fmt.Println(r)
 			res, err := http.Get("https://ja.snow-forecast.com/resorts/list_by_feature/" + r + "?v=2")
 			if err != nil {
 				panic(err)
@@ -53,7 +52,7 @@ func main() {
 			snowResorts := parseStringToSnowResorts(string(body))
 			for i := 0; i < len(snowResorts); i++ {
 				m.Lock()
-				file.WriteString(fmt.Sprintf("(\"%s\",\"%s\"),\n", snowResorts[i].Name, snowResorts[i].SearchKey))
+				file.WriteString(fmt.Sprintf("(\"%s\",\"%s\"),", snowResorts[i].Name, snowResorts[i].SearchKey))
 				m.Unlock()
 			}
 			<-ch
