@@ -6,6 +6,7 @@
 package main
 
 import (
+	"github.com/kotaroooo0/snowforecast-twitter-bot/cache"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/domain"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/handler"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/infrastructure"
@@ -17,8 +18,8 @@ import (
 
 // Injectors from injector.go:
 
-func initNewTwitterHandlerImpl(tc *twitter.TwitterConfig, yc *yahoo.YahooConfig, rc *repository.RedisConfig) (handler.TwitterHandler, error) {
-	client, err := repository.NewRedisClient(rc)
+func initNewTwitterHandlerImpl(tc *twitter.TwitterConfig, yc *yahoo.YahooConfig, rc *cache.RedisConfig) (handler.ReplyHandler, error) {
+	client, err := cache.NewRedisClient(rc)
 	if err != nil {
 		return nil, err
 	}
@@ -26,10 +27,10 @@ func initNewTwitterHandlerImpl(tc *twitter.TwitterConfig, yc *yahoo.YahooConfig,
 	iYahooApiClient := yahoo.NewYahooApiClient(yc)
 	iTwitterApiClient := twitter.NewTwitterApiClient(tc)
 	iSnowforecastApiClient := snowforecast.NewSnowforecastApiClient()
-	snowResortService := domain.NewSnowResortServiceImpl(snowResortRepository, iYahooApiClient, iTwitterApiClient, iSnowforecastApiClient)
-	twitterUseCase := usecase.NewTwitterUseCaseImpl(snowResortService, iYahooApiClient)
-	twitterHandler := handler.NewTwitterHandlerImpl(twitterUseCase)
-	return twitterHandler, nil
+	replyService := domain.NewReplyServiceImpl(snowResortRepository, iYahooApiClient, iTwitterApiClient, iSnowforecastApiClient)
+	replyUseCase := usecase.NewReplyUseCaseImpl(replyService, iYahooApiClient)
+	replyHandler := handler.NewReplyHandlerImpl(replyUseCase)
+	return replyHandler, nil
 }
 
 func initNewJobHandlerImpl() handler.JobHandler {

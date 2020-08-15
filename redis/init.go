@@ -7,7 +7,6 @@ import (
 	"os"
 	"strings"
 	"sync"
-	"unsafe"
 
 	"github.com/kotaroooo0/snowforecast-twitter-bot/domain"
 )
@@ -41,24 +40,23 @@ func main() {
 		wg.Add(1)
 		go func(r string) {
 			// 地域からスキー場を取得するリクエスト
-			stringSlice, err := http.Get("https://ja.snow-forecast.com/resorts/list_by_feature/" + r + "?v=2")
+			res, err := http.Get("https://ja.snow-forecast.com/resorts/list_by_feature/" + r + "?v=2")
 			if err != nil {
 				panic(err)
 			}
-			// byteからstringへ
-			stringSliceString, err := ioutil.ReadAll(stringSlice.Body)
+			body, err := ioutil.ReadAll(res.Body)
 			if err != nil {
 				panic(err)
 			}
-			// 配列のstringからparseして[]Snowresortへ
-			snowResorts := parseStringToSnowResorts(*(*string)(unsafe.Pointer(&stringSliceString)))
+
+			snowResorts := parseStringToSnowResorts(string(body))
 			for i := 0; i < len(snowResorts); i++ {
 				// redisへ追加する文を出力
 				// TODO: 今は小文字にしているだけだが、さらに/や-を取り除くと平等にマッチするかもしれない
-				file.WriteString("sadd lowercase-snowresorts-searchword " + strings.ToLower(snowResorts[i].SearchWord) + "\n")
-				file.WriteString("sadd lowercase-snowresorts-label \"" + strings.ToLower(snowResorts[i].Label) + "\"\n")
-				file.WriteString(fmt.Sprintf("hmset %s search_word %s label \"%s\"\n", strings.ToLower(snowResorts[i].SearchWord), snowResorts[i].SearchWord, snowResorts[i].Label))
-				file.WriteString(fmt.Sprintf("hmset \"%s\" search_word %s label \"%s\"\n", strings.ToLower(snowResorts[i].Label), snowResorts[i].SearchWord, snowResorts[i].Label))
+				file.WriteString("sadd lowercase-snowresorts-searchword " + strings.ToLower(snowResorts[i].SearchKey) + "\n")
+				file.WriteString("sadd lowercase-snowresorts-label \"" + strings.ToLower(snowResorts[i].Name) + "\"\n")
+				file.WriteString(fmt.Sprintf("hmset %s search_word %s label \"%s\"\n", strings.ToLower(snowResorts[i].SearchKey), snowResorts[i].SearchKey, snowResorts[i].))
+				file.WriteString(fmt.Sprintf("hmset \"%s\" search_word %s label \"%s\"\n", strings.ToLower(snowResorts[i].), snowResorts[i].SearchKey, snowResorts[i].))
 			}
 			<-ch
 			wg.Done()
@@ -94,8 +92,8 @@ func parseStringToSnowResorts(str string) []domain.SnowResort {
 	snowResorts := []domain.SnowResort{}
 	for i := 1; i < len(stringSlice); i += 2 {
 		snowResorts = append(snowResorts, domain.SnowResort{
-			SearchWord: stringSlice[i-1],
-			Label:      stringSlice[i],
+			Name:      stringSlice[i-1],
+			SearchKey: stringSlice[i],
 		})
 	}
 	return snowResorts

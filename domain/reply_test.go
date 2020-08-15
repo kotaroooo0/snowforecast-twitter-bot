@@ -10,6 +10,7 @@ import (
 	"github.com/go-redis/redis"
 	"github.com/google/go-cmp/cmp"
 	"github.com/joho/godotenv"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/snowforecast"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/twitter"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/yahoo"
 	"github.com/pkg/errors"
@@ -47,7 +48,7 @@ func before() {
 	}
 }
 
-type SnowResortServiceMock struct {
+type ReplyServiceMock struct {
 	SnowResortRepository SnowResortRepository
 	YahooApiClient       yahoo.IYahooApiClient
 	TwitterApiClient     twitter.ITwitterApiClient
@@ -60,9 +61,17 @@ type SnowResortRepositoryMock struct {
 	SetSnowResortCallCount   int
 }
 
+type ReplyServiceImpl struct {
+	// ドメイン層は他の層にも依存しない
+	SnowResortRepository  SnowResortRepository
+	YahooApiClient        yahoo.IYahooApiClient
+	TwitterApiClient      twitter.ITwitterApiClient
+	SnowforecastApiClient snowforecast.ISnowforecastApiClient
+}
+
 func testClient() (*redis.Client, error) {
 	client := redis.NewClient(&redis.Options{
-		Addr: os.Getenv("REDIS_HOST") + ":6379",
+		Addr: os.Getenv("REDIS_HOST") + ":" + os.Getenv("REDIS_PORT"),
 		DB:   1, // 1のDBをテスト用とする
 	})
 	if err := client.Ping().Err(); err != nil {
@@ -310,7 +319,10 @@ func TestToHiragana(t *testing.T) {
 	}
 
 	for _, tt := range cases {
-		act := toHiragana(tt.kanji, &ApiClientMock{})
+		act, err := toHiragana(tt.kanji, &ApiClientMock{})
+		if err != nil {
+			t.Error(err)
+		}
 		if act != tt.hiragana {
 			t.Error(fmt.Sprintf("%s is not %s", act, tt.kanji))
 		}

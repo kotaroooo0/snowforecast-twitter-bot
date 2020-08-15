@@ -1,96 +1,32 @@
 package repository
 
 import (
+	"fmt"
 	"testing"
-
-	"github.com/kotaroooo0/snowforecast-twitter-bot/domain"
-
-	"github.com/alicebob/miniredis"
-	"github.com/go-redis/redis/v7"
-	"github.com/google/go-cmp/cmp"
 )
 
-func NewMockRedis(t *testing.T) *redis.Client {
-	t.Helper()
+// TODO
+// 今はただの動作確認
 
-	s, err := miniredis.Run()
+func TestFindAll(t *testing.T) {
+	dbConfig := &DBConfig{
+		User:     "root",
+		Password: "password",
+		Addr:     "127.0.0.1",
+		Port:     "3306",
+		DB:       "snowforecast_twitter_bot",
+	}
+	dbClient, err := NewDBClient(dbConfig)
 	if err != nil {
-		t.Fatalf("unexpected error while createing test redis server '%#v'", err)
+		t.Fatal(err)
 	}
-
-	client := redis.NewClient(&redis.Options{
-		Addr: s.Addr(),
-	})
-	return client
-}
-
-func TestListSnowResorts(t *testing.T) {
-	client := NewMockRedis(t)
-	s := SnowResortRepositoryImpl{
-		Client: client,
+	if err = dbClient.Ping(); err != nil {
+		t.Fatal(err)
 	}
-
-	client.SAdd("lowercase-snowresorts-serchword", "TashiroKaguraMitsumata", "Akakura-Kumado", "Hakuba47")
-	actual, err := s.ListSnowResorts("lowercase-snowresorts-serchword")
+	r := NewSnowResortRepositoryImpl(dbClient)
+	sr, err := r.FindAll()
 	if err != nil {
-		t.Fatalf("unexpected error while ListSnowResorts '%#v'", err)
+		t.Fatal(err)
 	}
-
-	// sliceではcmp.Diffで順序が考慮されてしまうのでSetに変換して比較する
-	expectedSet := make(map[string]struct{})
-	for _, v := range []string{"TashiroKaguraMitsumata", "Akakura-Kumado", "Hakuba47"} {
-		expectedSet[v] = struct{}{}
-	}
-	actualSet := make(map[string]struct{})
-	for _, v := range actual {
-		actualSet[v] = struct{}{}
-	}
-	if diff := cmp.Diff(actualSet, expectedSet); diff != "" {
-		t.Errorf("Diff: (-got +want)\n%s", diff)
-	}
-}
-
-func TestFindSnowResort(t *testing.T) {
-	client := NewMockRedis(t)
-	s := SnowResortRepositoryImpl{
-		Client: client,
-	}
-	client.HMSet("hakuba47", "search_word", "Hakuba47", "label", "Hakuba 47")
-
-	cases := []struct {
-		input  string
-		output domain.SnowResort
-	}{
-		{
-			input:  "hoge",
-			output: domain.SnowResort{},
-		},
-		{
-			input:  "hakuba47",
-			output: domain.SnowResort{SearchWord: "Hakuba47", Label: "Hakuba 47"},
-		},
-	}
-
-	for _, tt := range cases {
-		act, err := s.FindSnowResort(tt.input)
-		if err != nil {
-			t.Fatalf("unexpected error while TestFindSnowResort '%#v'", err)
-		}
-		if diff := cmp.Diff(act, tt.output); diff != "" {
-			t.Errorf("Diff: (-got +want)\n%s", diff)
-		}
-	}
-
-}
-
-func TestSetSnowResort(t *testing.T) {
-	client := NewMockRedis(t)
-	s := SnowResortRepositoryImpl{
-		Client: client,
-	}
-	err := s.SetSnowResort("47", domain.SnowResort{SearchWord: "Hakuba47", Label: "Hakuba 47"})
-	if err != nil {
-		t.Error(err)
-	}
-
+	fmt.Println(sr)
 }

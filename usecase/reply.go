@@ -10,32 +10,32 @@ import (
 	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/yahoo"
 )
 
-type TwitterUseCase interface {
+type ReplyUseCase interface {
 	NewGetTwitterWebhookRequest() GetTwitterWebhookRequest
 	NewPostTwitterWebhookRequest() PostTwitterWebhookRequest
 	GetCrcTokenResponse(GetTwitterWebhookRequest) GetTwitterWebhookResponse
 	PostAutoReplyResponse(PostTwitterWebhookRequest) PostTwitterWebhookResponse
 }
 
-type TwitterUseCaseImpl struct {
-	SnowResortService domain.SnowResortService
-	YahooApiClient    yahoo.IYahooApiClient
+type ReplyUseCaseImpl struct {
+	ReplyService   domain.ReplyService
+	YahooApiClient yahoo.IYahooApiClient
 }
 
-func NewTwitterUseCaseImpl(snowResortService domain.SnowResortService, yahooApiClient yahoo.IYahooApiClient) TwitterUseCase {
-	return &TwitterUseCaseImpl{
-		SnowResortService: snowResortService,
-		YahooApiClient:    yahooApiClient,
+func NewReplyUseCaseImpl(rs domain.ReplyService, yac yahoo.IYahooApiClient) ReplyUseCase {
+	return &ReplyUseCaseImpl{
+		ReplyService:   rs,
+		YahooApiClient: yac,
 	}
 }
 
-func (tu TwitterUseCaseImpl) NewGetTwitterWebhookRequest() GetTwitterWebhookRequest {
+func (tu ReplyUseCaseImpl) NewGetTwitterWebhookRequest() GetTwitterWebhookRequest {
 	return GetTwitterWebhookRequest{}
 }
 
 // TwitterのWebhookの認証に用いる
 // ref: https://developer.twitter.com/en/docs/accounts-and-users/subscribe-account-activity/guides/securing-webhooks
-func (tu TwitterUseCaseImpl) GetCrcTokenResponse(req GetTwitterWebhookRequest) GetTwitterWebhookResponse {
+func (tu ReplyUseCaseImpl) GetCrcTokenResponse(req GetTwitterWebhookRequest) GetTwitterWebhookResponse {
 	mac := hmac.New(sha256.New, []byte(os.Getenv("CONSUMER_SECRET")))
 	mac.Write([]byte(req.CrcToken))
 	return GetTwitterWebhookResponse{
@@ -43,11 +43,11 @@ func (tu TwitterUseCaseImpl) GetCrcTokenResponse(req GetTwitterWebhookRequest) G
 	}
 }
 
-func (tu TwitterUseCaseImpl) NewPostTwitterWebhookRequest() PostTwitterWebhookRequest {
+func (tu ReplyUseCaseImpl) NewPostTwitterWebhookRequest() PostTwitterWebhookRequest {
 	return PostTwitterWebhookRequest{}
 }
 
-func (tu TwitterUseCaseImpl) PostAutoReplyResponse(req PostTwitterWebhookRequest) PostTwitterWebhookResponse {
+func (tu ReplyUseCaseImpl) PostAutoReplyResponse(req PostTwitterWebhookRequest) PostTwitterWebhookResponse {
 	// リプライがない、もしくはユーザが不正な場合は空を返す
 	if len(req.TweetCreateEvents) < 1 || req.UserID == req.TweetCreateEvents[0].User.IDStr {
 		return PostTwitterWebhookResponse{}
@@ -58,8 +58,14 @@ func (tu TwitterUseCaseImpl) PostAutoReplyResponse(req PostTwitterWebhookRequest
 		UserScreenName: req.TweetCreateEvents[0].User.ScreenName,
 	}
 
-	// リプライを取得
-	replyText := req.TweetCreateEvents[0].Text
+	// Redisにキャッシュしてある場合それを返す
+	cachedSnowResort, err := ss.SnowResortCache.Get(key)
+	if err != nil {
+		return &SnowResort{}, err
+	}
+	if (cachedSnowResort != &SnowResort{}) {
+		return cachedSnowResort, nil
+	}
 
 	// リプライから全世界のスキー場の中で最も適切なスキー場を求める
 	similarSkiResort, err := tu.SnowResortService.GetSimilarSnowResortFromReply(replyText)
@@ -70,6 +76,13 @@ func (tu TwitterUseCaseImpl) PostAutoReplyResponse(req PostTwitterWebhookRequest
 	if err != nil {
 		return PostTwitterWebhookResponse{}
 	}
+
+	// Redisにキャッシュする
+	err = ss.SnowResortCache.Set(key, similarSnowResort)
+	if err != nil {
+		return &SnowResort{}, err
+	}
+
 	return PostTwitterWebhookResponse{skiResort.Label}
 }
 

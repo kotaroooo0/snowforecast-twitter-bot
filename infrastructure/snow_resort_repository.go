@@ -1,61 +1,66 @@
 package repository
 
 import (
-	"github.com/go-redis/redis/v7"
+	"fmt"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/domain"
-	"github.com/pkg/errors"
 )
 
 type SnowResortRepositoryImpl struct {
-	Client *redis.Client
+	DB *sqlx.DB
 }
 
-func NewRedisClient(redisConfig *RedisConfig) (*redis.Client, error) {
-	client := redis.NewClient(&redis.Options{
-		Addr: redisConfig.Addr + ":6379",
-	})
-	if err := client.Ping().Err(); err != nil {
-		return nil, errors.Wrapf(err, "failed to ping redis server")
-	}
-	return client, nil
-}
-
-type RedisConfig struct {
-	Addr string
-}
-
-func NewRedisConfig(addr string) *RedisConfig {
-	return &RedisConfig{
-		Addr: addr,
-	}
-}
-
-func NewSnowResortRepositoryImpl(client *redis.Client) domain.SnowResortRepository {
+func NewSnowResortRepositoryImpl(db *sqlx.DB) domain.SnowResortRepository {
 	return &SnowResortRepositoryImpl{
-		Client: client,
+		DB: db,
 	}
 }
 
-// TODO: DomainModelを返すように修正
-func (s SnowResortRepositoryImpl) ListSnowResorts(key string) ([]string, error) {
-	result, err := s.Client.SMembers(key).Result()
+func NewDBClient(dbConfig *DBConfig) (*sqlx.DB, error) {
+	db, err := sqlx.Open(
+		"mysql",
+		fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbConfig.User, dbConfig.Password, dbConfig.Addr, dbConfig.Port, dbConfig.DB),
+	)
 	if err != nil {
 		return nil, err
 	}
-
-	return result, nil
+	return db, nil
 }
 
-func (s SnowResortRepositoryImpl) FindSnowResort(key string) (domain.SnowResort, error) {
-	result, err := s.Client.HGetAll(key).Result()
+func NewDBConfig(user, password, addr, port, db string) *DBConfig {
+	return &DBConfig{
+		User:     user,
+		Password: password,
+		Addr:     addr,
+		Port:     port,
+		DB:       db,
+	}
+}
+
+type DBConfig struct {
+	User     string
+	Password string
+	Addr     string
+	Port     string
+	DB       string
+}
+
+func (s SnowResortRepositoryImpl) FindAll() ([]*domain.SnowResort, error) {
+	rows, err := s.DB.Queryx("select * from snow_resorts")
 	if err != nil {
-		return domain.SnowResort{}, err
+		return []*domain.SnowResort{}, err
 	}
 
-	return domain.SnowResort{SearchWord: result["search_word"], Label: result["label"]}, nil
-}
-
-func (s SnowResortRepositoryImpl) SetSnowResort(key string, snowResort domain.SnowResort) error {
-	err := s.Client.HMSet(key, "search_word", snowResort.SearchWord, "label", snowResort.Label)
-	return err.Err()
+	var snowResorts []*domain.SnowResort
+	for rows.Next() {
+		var snowResort domain.SnowResort
+		err := rows.StructScan(&snowResort)
+		if err != nil {
+			return []*domain.SnowResort{}, err
+		}
+		snowResorts = append(snowResorts, &snowResort)
+	}
+	return snowResorts, nil
 }
