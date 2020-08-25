@@ -17,11 +17,17 @@ services:
     ports:
       - 6379:6379
   es:
-    image: elasticsearch:7.8.1
+    build:
+      context: ../elasticsearch
     environment:
       - discovery.type=single-node
     volumes:
       - ../elasticsearch:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
-
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.2.0
+    ports:
+      - 5601:5601
+    depends_on:
+      - es

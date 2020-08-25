@@ -1,0 +1,18 @@
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "katakana_analyzer": {
+          "tokenizer": "kuromoji_tokenizer",
+          "filter": ["romaji_readingform"]
+        }
+      },
+      "filter": {
+        "romaji_readingform": {
+          "type": "kuromoji_readingform",
+          "use_romaji": true
+        }
+      }
+    }
+  }
+}
