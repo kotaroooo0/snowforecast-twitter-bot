@@ -23,6 +23,10 @@ type SnowResortSearcher interface {
 	FindSimilarSnowResort(string) (*SnowResort, error)
 }
 
+type SnowResortRepository interface {
+	FindAll() ([]*SnowResort, error)
+}
+
 type Tweet struct {
 	ID             string
 	UserScreenName string

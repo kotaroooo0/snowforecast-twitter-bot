@@ -12,29 +12,29 @@ import (
 	"github.com/texttheater/golang-levenshtein/levenshtein"
 )
 
-type SnowResortSearcherMysqlImpl struct {
-	SnowResortRepositoryImpl SnowResortRepositoryImpl
-	YahooApiClient           YahooApiClient
+type SnowResortSearcherMySQLImpl struct {
+	SnowResortRepository domain.SnowResortRepository
+	YahooApiClient       yahoo.IYahooApiClient
 }
 
-func (s SnowResortSearcherMysqlImpl) FindSimilarSnowResort(source string) (domain.SnowResort, error) {
+func (s SnowResortSearcherMysqlImpl) FindSimilarSnowResort(source string) (*domain.SnowResort, error) {
 	// スペースを消す
-	replyText = strings.Replace(replyText, " ", "", -1)
-	key := strings.Replace(replyText, "　", "", -1)
+	source = strings.Replace(source, " ", "", -1)
+	key := strings.Replace(source, "　", "", -1)
 
 	// 漢字をひらがなに変換(ex:GALA湯沢 -> GALAゆざわ)
-	replyText, err := toHiragana(key, s.YahooApiClient)
+	source, err := toHiragana(key, s.YahooApiClient)
 	if err != nil {
-		return &SnowResort{}, err
+		return &domain.SnowResort{}, err
 	}
 	// ひらがなをアルファベットに変換(ex:GALAゆざわ -> GALAyuzawa)
-	replyText = jaconv.ToHebon(replyText)
+	source = jaconv.ToHebon(source)
 
 	srs, err := s.SnowResortRepository.FindAll()
 	if err != nil {
-		return &SnowResort{}, err
+		return &domain.SnowResort{}, err
 	}
-	sr := findSimilarSnowResort(replyText, srs)
+	sr := findSimilarSnowResort(source, srs)
 	return sr, nil
 }
 
