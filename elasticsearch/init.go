@@ -1,4 +1,4 @@
-package searcher
+package main
 
 import (
 	"fmt"
@@ -52,9 +52,11 @@ func main() {
 			snowResorts := parseStringToSnowResorts(string(body))
 			for i := 0; i < len(snowResorts); i++ {
 				m.Lock()
-				// {"index":{"_id":"1"}}
-				file.WriteString(fmt.Sprintf("{\"index\":{\"_id\":\"%d\"}}\n", id))
-				file.WriteString(fmt.Sprintf("{\"id\":\"%d\",\"name\":\"%s\",\"search_key\":\"%s\"}\n", id, snowResorts[i].Name, snowResorts[i].SearchKey))
+				// {"index": {"_index":"snow_resorts_v1", "_type":"_doc", "_id":"1"}}
+				// {"title": "title0", "name":"name0", "age":10, "created":"2019-08-01"}
+				// TODO: インデックス名のハードコーディング🙅‍♂️
+				file.WriteString(fmt.Sprintf("{\"index\":{\"_index\":\"%s\", \"_type\":\"_doc\", \"_id\":\"%d\"}}\n", "snow_resorts_v1", id))
+				file.WriteString(fmt.Sprintf("{\"name\":\"%s\",\"search_key\":\"%s\"}\n", snowResorts[i].Name, snowResorts[i].SearchKey))
 				id++
 				m.Unlock()
 			}

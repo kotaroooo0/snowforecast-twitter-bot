@@ -2,7 +2,7 @@
   "settings": {
     "analysis": {
       "analyzer": {
-        "katakana_analyzer": {
+        "romaji_analyzer": {
           "char_filter": ["icu_normalizer"],
           "tokenizer": "kuromoji_tokenizer",
           "filter": ["romaji_readingform", "2_3_grams"]
@@ -18,6 +18,18 @@
           "min_gram": 2,
           "max_gram": 3
         }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "name": {
+        "type": "text",
+        "analyzer": "romaji_analyzer"
+      },
+      "search_key": {
+        "type": "text",
+        "analyzer": "romaji_analyzer"
       }
     }
   }
