@@ -14,9 +14,8 @@ import (
 )
 
 type SnowResort struct {
-	Id        int    `db:"id"`
-	Name      string `db:"name"`
-	SearchKey string `db:"search_key"`
+	Name      string `db:"name" json:"name"`
+	SearchKey string `db:"search_key" json:"search_key"`
 }
 
 type SnowResortSearcher interface {

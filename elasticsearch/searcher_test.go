@@ -1,7 +1,9 @@
-package searcher
+package main
 
-import "testing"
+import (
+	"testing"
+)
 
-func TestGet(t *testing.T) {
-	NewSnowResortSearcherEsImple()
-}
+func TestNewSnowResortSearcherEsImpl(t *testing.T) {}
+
+func TestFindSimilarSnowResort(t *testing.T) {}

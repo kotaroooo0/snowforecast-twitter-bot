@@ -5,7 +5,7 @@
         "romaji_analyzer": {
           "char_filter": ["icu_normalizer"],
           "tokenizer": "kuromoji_tokenizer",
-          "filter": ["romaji_readingform", "2_3_grams"]
+          "filter": ["romaji_readingform", "engram"]
         }
       },
       "filter": {
@@ -13,10 +13,10 @@
           "type": "kuromoji_readingform",
           "use_romaji": true
         },
-        "2_3_grams": {
-          "type": "ngram",
+        "engram": {
+          "type": "edge_ngram",
           "min_gram": 2,
-          "max_gram": 3
+          "max_gram": 100
         }
       }
     }
