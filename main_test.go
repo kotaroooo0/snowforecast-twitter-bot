@@ -23,7 +23,10 @@ func before() {
 func TestGetTwitterWebhook(t *testing.T) {
 	before()
 
-	router := setupRouter()
+	router, err := setupRouter()
+	if err != nil {
+		t.Error(err)
+	}
 
 	w := httptest.NewRecorder()
 	values := url.Values{}

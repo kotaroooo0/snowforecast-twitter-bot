@@ -39,7 +39,6 @@ type ReplyService interface {
 type ReplyServiceImpl struct {
 	// ドメイン層は他の層にも依存しない
 	SnowResortSearcher    SnowResortSearcher
-	YahooApiClient        yahoo.IYahooApiClient
 	TwitterApiClient      twitter.ITwitterApiClient
 	SnowforecastApiClient snowforecast.ISnowforecastApiClient
 }
@@ -47,7 +46,6 @@ type ReplyServiceImpl struct {
 func NewReplyServiceImpl(snowResortSearcher SnowResortSearcher, yahooApiClient yahoo.IYahooApiClient, twitterApiClient twitter.ITwitterApiClient, snowforecastApiClient snowforecast.ISnowforecastApiClient) ReplyService {
 	return &ReplyServiceImpl{
 		SnowResortSearcher:    snowResortSearcher,
-		YahooApiClient:        yahooApiClient,
 		TwitterApiClient:      twitterApiClient,
 		SnowforecastApiClient: snowforecastApiClient,
 	}
