@@ -10,7 +10,6 @@ import (
 	"github.com/go-redis/redis"
 	"github.com/google/go-cmp/cmp"
 	"github.com/joho/godotenv"
-	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/snowforecast"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/twitter"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/yahoo"
 	"github.com/pkg/errors"
@@ -59,14 +58,6 @@ type SnowResortRepositoryMock struct {
 	ListSnowResortsCallCount int
 	FindSnowResortCallCount  int
 	SetSnowResortCallCount   int
-}
-
-type ReplyServiceImpl struct {
-	// ドメイン層は他の層にも依存しない
-	SnowResortRepository  SnowResortRepository
-	YahooApiClient        yahoo.IYahooApiClient
-	TwitterApiClient      twitter.ITwitterApiClient
-	SnowforecastApiClient snowforecast.ISnowforecastApiClient
 }
 
 func testClient() (*redis.Client, error) {

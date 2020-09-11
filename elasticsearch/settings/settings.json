@@ -1,0 +1,36 @@
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "romaji_analyzer": {
+          "char_filter": ["icu_normalizer"],
+          "tokenizer": "kuromoji_tokenizer",
+          "filter": ["romaji_readingform", "engram"]
+        }
+      },
+      "filter": {
+        "romaji_readingform": {
+          "type": "kuromoji_readingform",
+          "use_romaji": true
+        },
+        "engram": {
+          "type": "edge_ngram",
+          "min_gram": 2,
+          "max_gram": 100
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "name": {
+        "type": "text",
+        "analyzer": "romaji_analyzer"
+      },
+      "search_key": {
+        "type": "text",
+        "analyzer": "romaji_analyzer"
+      }
+    }
+  }
+}

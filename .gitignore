@@ -2,3 +2,5 @@
 .idea
 main
 snowforecast-twitter-bot
+elasticsearch/nodes
+redis/temp-1.rdb

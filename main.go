@@ -1,57 +1,75 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
 	"github.com/bamzi/jobrunner"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"github.com/kotaroooo0/snowforecast-twitter-bot/cache"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/domain"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/elasticsearch"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/handler"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/snowforecast"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/twitter"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/yahoo"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/usecase"
 )
 
-func envLoad() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+func envLoad() error {
+	if err := godotenv.Load(); err != nil {
+		return fmt.Errorf("error: loading .env file")
 	}
+	return nil
 }
 
 // season outしたためストップ
-func setupBatch() {
+func setupBatch() error {
 	//api := twitter.NewTwitterApiClient(twitter.NewTwitterConfig(os.Getenv("CONSUMER_KEY"),os.Getenv("CONSUMER_SECRET"),os.Getenv("ACCESS_TOKEN_KEY"),os.Getenv("ACCESS_TOKEN_SECRET")))
 	jobrunner.Start()
 	// jobrunner.Schedule("00 01 * * *", batch.TweetForecast{api, "Hakuba47", "TakasuSnowPark"})
 	// jobrunner.Schedule("20 01 * * *", batch.TweetForecast{api, "MarunumaKogen", "TashiroKaguraMitsumata"})
+	return nil
 }
 
-func setupRouter() *gin.Engine {
-	twitterHandler, err := initNewTwitterHandlerImpl(
-		twitter.NewTwitterConfig(os.Getenv("CONSUMER_KEY"), os.Getenv("CONSUMER_SECRET"), os.Getenv("ACCESS_TOKEN_KEY"), os.Getenv("ACCESS_TOKEN_SECRET")),
-		yahoo.NewYahooConfig(os.Getenv("YAHOO_APP_ID")),
-		cache.NewRedisConfig(os.Getenv("REDIS_HOST")),
-	)
+func setupRouter() (*gin.Engine, error) {
+	tc := twitter.NewTwitterConfig(os.Getenv("CONSUMER_KEY"), os.Getenv("CONSUMER_SECRET"), os.Getenv("ACCESS_TOKEN_KEY"), os.Getenv("ACCESS_TOKEN_SECRET"))
+	yc := yahoo.NewYahooConfig(os.Getenv("YAHOO_APP_ID"))
+	yac := yahoo.NewYahooApiClient(yc)
+	tac := twitter.NewTwitterApiClient(tc)
+	sac := snowforecast.NewSnowforecastApiClient()
+	ei, err := elasticsearch.NewSnowResortSearcherEsImpl()
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	jobHandler := initNewJobHandlerImpl()
-
+	rs := domain.NewReplyServiceImpl(ei, yac, tac, sac)
+	ru := usecase.NewReplyUseCaseImpl(rs)
+	rh := handler.NewReplyHandlerImpl(ru)
+	jh := handler.NewJobHandlerImpl()
 	r := gin.Default()
-	r.GET("/twitter_webhook", twitterHandler.HandleTwitterGetCrcToken)
-	r.POST("/twitter_webhook", twitterHandler.HandleTwitterPostWebhook)
-	r.GET("/job_status", jobHandler.HandleGetJobStatus)
-	return r
+	r.GET("/twitter_webhook", rh.HandleTwitterGetCrcToken)
+	r.POST("/twitter_webhook", rh.HandleTwitterPostWebhook)
+	r.GET("/job_status", jh.HandleGetJobStatus)
+	return r, nil
+}
+
+func run() error {
+	if err := envLoad(); err != nil {
+		return err
+	}
+	if err := setupBatch(); err != nil {
+		return err
+	}
+	r, err := setupRouter()
+	if err != nil {
+		return err
+	}
+	return r.Run(":3000")
 }
 
 func main() {
-	envLoad()
-	setupBatch()
-
-	r := setupRouter()
-	err := r.Run(":3000")
-	if err != nil {
+	if err := run(); err != nil {
 		log.Fatal(err)
 	}
 }

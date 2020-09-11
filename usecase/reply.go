@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/kotaroooo0/snowforecast-twitter-bot/domain"
-	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/yahoo"
 )
 
 type ReplyUseCase interface {
@@ -18,14 +17,12 @@ type ReplyUseCase interface {
 }
 
 type ReplyUseCaseImpl struct {
-	ReplyService   domain.ReplyService
-	YahooApiClient yahoo.IYahooApiClient
+	ReplyService domain.ReplyService
 }
 
-func NewReplyUseCaseImpl(rs domain.ReplyService, yac yahoo.IYahooApiClient) ReplyUseCase {
+func NewReplyUseCaseImpl(rs domain.ReplyService) ReplyUseCase {
 	return &ReplyUseCaseImpl{
-		ReplyService:   rs,
-		YahooApiClient: yac,
+		ReplyService: rs,
 	}
 }
 
@@ -58,32 +55,12 @@ func (tu ReplyUseCaseImpl) PostAutoReplyResponse(req PostTwitterWebhookRequest) 
 		UserScreenName: req.TweetCreateEvents[0].User.ScreenName,
 	}
 
-	// Redisにキャッシュしてある場合それを返す
-	cachedSnowResort, err := ss.SnowResortCache.Get(key)
-	if err != nil {
-		return &SnowResort{}, err
-	}
-	if (cachedSnowResort != &SnowResort{}) {
-		return cachedSnowResort, nil
-	}
-
 	// リプライから全世界のスキー場の中で最も適切なスキー場を求める
-	similarSkiResort, err := tu.SnowResortService.GetSimilarSnowResortFromReply(replyText)
+	sr, err := tu.ReplyService.ReplyForecast(&tweet)
 	if err != nil {
 		return PostTwitterWebhookResponse{}
 	}
-	skiResort, err := tu.SnowResortService.ReplyForecast(similarSkiResort, tweet)
-	if err != nil {
-		return PostTwitterWebhookResponse{}
-	}
-
-	// Redisにキャッシュする
-	err = ss.SnowResortCache.Set(key, similarSnowResort)
-	if err != nil {
-		return &SnowResort{}, err
-	}
-
-	return PostTwitterWebhookResponse{skiResort.Label}
+	return PostTwitterWebhookResponse{sr.Name}
 }
 
 type GetTwitterWebhookRequest struct {

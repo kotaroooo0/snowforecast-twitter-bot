@@ -1,18 +1,36 @@
-version: "3"
+version: "3.6"
 
 services:
-  rdb:
-    image: mysql:5.7
-    restart: always
-    volumes:
-      - ../mysql:/docker-entrypoint-initdb.d
-    ports:
-      - "3306:3306"
+  # rdb:
+  #   image: mysql:5.7
+  #   restart: always
+  #   volumes:
+  #     - ../mysql:/docker-entrypoint-initdb.d
+  #   ports:
+  #     - 3306:3306
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: password
+  # redis:
+  #   image: redis:6.0.5-alpine
+  #   volumes:
+  #     - ../redis:/data
+  #   ports:
+  #     - 6379:6379
+  elasticsearch:
+    build:
+      context: ../elasticsearch
     environment:
-      MYSQL_ROOT_PASSWORD: password
-  redis:
-    image: redis:6.0.5-alpine
+      - discovery.type=single-node
     volumes:
-      - ./app/db:/data
+      - ../elasticsearch:/usr/share/elasticsearch/data
     ports:
-      - "6379:6379"
+      - 9200:9200
+      - 9300:9300
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.4.0
+    links:
+      - elasticsearch
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    ports:
+      - 5601:5601
