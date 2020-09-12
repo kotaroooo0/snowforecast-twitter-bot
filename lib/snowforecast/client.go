@@ -6,24 +6,24 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-type ISnowforecastApiClient interface {
-	GetSnowfallForecastBySkiResortSearchWord(string) (SnowfallForecast, error)
+type IApiClient interface {
+	GetForecastBySearchWord(string) (Forecast, error)
 }
 
-type SnowforecastApiClient struct{}
+type ApiClient struct{}
 
-func NewSnowforecastApiClient() ISnowforecastApiClient {
-	return &SnowforecastApiClient{}
+func NewApiClient() IApiClient {
+	return &ApiClient{}
 }
 
 // 以下の3パターンの予報が取得できる
 // 1.本日の朝からの予報が見れる時
 // 2.本日の昼からの予報が見れる時
 // 3.本日の夜からの予報が見れる時
-func (sc SnowforecastApiClient) GetSnowfallForecastBySkiResortSearchWord(skiResortSearchWord string) (SnowfallForecast, error) {
-	doc, err := goquery.NewDocument("https://ja.snow-forecast.com/resorts/" + skiResortSearchWord + "/6day/top")
+func (sc ApiClient) GetForecastBySearchWord(searchWord string) (Forecast, error) {
+	doc, err := goquery.NewDocument("https://ja.snow-forecast.com/resorts/" + searchWord + "/6day/top")
 	if err != nil {
-		return SnowfallForecast{}, err
+		return Forecast{}, err
 	}
 
 	snowfalls := make([]Snow, 0)
@@ -72,7 +72,7 @@ func (sc SnowforecastApiClient) GetSnowfallForecastBySkiResortSearchWord(skiReso
 		}
 	})
 
-	return NewSnowfallForecast(snowfalls, rainfalls, skiResortSearchWord), nil
+	return NewForecast(snowfalls, rainfalls, searchWord), nil
 }
 
 func selectionToInt(s *goquery.Selection) int {
@@ -87,14 +87,14 @@ func selectionToInt(s *goquery.Selection) int {
 	return fallInt
 }
 
-type SnowfallForecast struct {
+type Forecast struct {
 	Snows     []Snow
 	Rains     []Rain
 	SkiResort string
 }
 
-func NewSnowfallForecast(snows []Snow, rains []Rain, skiResort string) SnowfallForecast {
-	return SnowfallForecast{
+func NewForecast(snows []Snow, rains []Rain, skiResort string) Forecast {
+	return Forecast{
 		Snows:     snows,
 		Rains:     rains,
 		SkiResort: skiResort,

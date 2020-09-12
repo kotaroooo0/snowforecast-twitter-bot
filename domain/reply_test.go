@@ -17,7 +17,7 @@ import (
 
 // TODO:動作確認用に書いたが、モックを使ったしっかりしたテストを書くとありがたがられる
 // func TestReplyContent(t *testing.T) {
-// 	testClient := snowforecast.NewSnowforecastApiClient()
+// 	testClient := snowforecast.NewApiClient()
 
 // 	cases := []struct {
 // 		snowResort SnowResort
@@ -50,7 +50,7 @@ func before() {
 type ReplyServiceMock struct {
 	SnowResortRepository SnowResortRepository
 	YahooApiClient       yahoo.IYahooApiClient
-	TwitterApiClient     twitter.ITwitterApiClient
+	ApiClient            twitter.IApiClient
 }
 
 type SnowResortRepositoryMock struct {

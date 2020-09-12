@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/snowforecast"
-	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/yahoo"
 	"golang.org/x/exp/utf8string"
 
 	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/twitter"
@@ -39,11 +38,11 @@ type ReplyService interface {
 type ReplyServiceImpl struct {
 	// ドメイン層は他の層にも依存しない
 	SnowResortSearcher    SnowResortSearcher
-	TwitterApiClient      twitter.ITwitterApiClient
-	SnowforecastApiClient snowforecast.ISnowforecastApiClient
+	TwitterApiClient      twitter.IApiClient
+	SnowforecastApiClient snowforecast.IApiClient
 }
 
-func NewReplyServiceImpl(snowResortSearcher SnowResortSearcher, yahooApiClient yahoo.IYahooApiClient, twitterApiClient twitter.ITwitterApiClient, snowforecastApiClient snowforecast.ISnowforecastApiClient) ReplyService {
+func NewReplyServiceImpl(snowResortSearcher SnowResortSearcher, twitterApiClient twitter.IApiClient, snowforecastApiClient snowforecast.IApiClient) ReplyService {
 	return &ReplyServiceImpl{
 		SnowResortSearcher:    snowResortSearcher,
 		TwitterApiClient:      twitterApiClient,
@@ -63,7 +62,7 @@ func (r ReplyServiceImpl) ReplyForecast(tweet *Tweet) (*SnowResort, error) {
 		return &SnowResort{}, err
 	}
 
-	sf, err := r.SnowforecastApiClient.GetSnowfallForecastBySkiResortSearchWord(sr.SearchKey)
+	sf, err := r.SnowforecastApiClient.GetForecastBySearchWord(sr.SearchKey)
 	if err != nil {
 		return &SnowResort{}, err
 	}

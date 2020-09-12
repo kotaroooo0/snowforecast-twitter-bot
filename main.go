@@ -13,7 +13,6 @@ import (
 	"github.com/kotaroooo0/snowforecast-twitter-bot/handler"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/snowforecast"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/twitter"
-	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/yahoo"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/usecase"
 )
 
@@ -26,7 +25,7 @@ func envLoad() error {
 
 // season outしたためストップ
 func setupBatch() error {
-	//api := twitter.NewTwitterApiClient(twitter.NewTwitterConfig(os.Getenv("CONSUMER_KEY"),os.Getenv("CONSUMER_SECRET"),os.Getenv("ACCESS_TOKEN_KEY"),os.Getenv("ACCESS_TOKEN_SECRET")))
+	//api := twitter.NewApiClient(twitter.NewTwitterConfig(os.Getenv("CONSUMER_KEY"),os.Getenv("CONSUMER_SECRET"),os.Getenv("ACCESS_TOKEN_KEY"),os.Getenv("ACCESS_TOKEN_SECRET")))
 	jobrunner.Start()
 	// jobrunner.Schedule("00 01 * * *", batch.TweetForecast{api, "Hakuba47", "TakasuSnowPark"})
 	// jobrunner.Schedule("20 01 * * *", batch.TweetForecast{api, "MarunumaKogen", "TashiroKaguraMitsumata"})
@@ -35,15 +34,13 @@ func setupBatch() error {
 
 func setupRouter() (*gin.Engine, error) {
 	tc := twitter.NewTwitterConfig(os.Getenv("CONSUMER_KEY"), os.Getenv("CONSUMER_SECRET"), os.Getenv("ACCESS_TOKEN_KEY"), os.Getenv("ACCESS_TOKEN_SECRET"))
-	yc := yahoo.NewYahooConfig(os.Getenv("YAHOO_APP_ID"))
-	yac := yahoo.NewYahooApiClient(yc)
-	tac := twitter.NewTwitterApiClient(tc)
-	sac := snowforecast.NewSnowforecastApiClient()
+	tac := twitter.NewApiClient(tc)
+	sac := snowforecast.NewApiClient()
 	ei, err := elasticsearch.NewSnowResortSearcherEsImpl()
 	if err != nil {
 		return nil, err
 	}
-	rs := domain.NewReplyServiceImpl(ei, yac, tac, sac)
+	rs := domain.NewReplyServiceImpl(ei, tac, sac)
 	ru := usecase.NewReplyUseCaseImpl(rs)
 	rh := handler.NewReplyHandlerImpl(ru)
 	jh := handler.NewJobHandlerImpl()
