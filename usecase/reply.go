@@ -4,16 +4,15 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
+	"fmt"
 	"os"
 
 	"github.com/kotaroooo0/snowforecast-twitter-bot/domain"
 )
 
 type ReplyUseCase interface {
-	NewGetTwitterWebhookRequest() GetTwitterWebhookRequest
-	NewPostTwitterWebhookRequest() PostTwitterWebhookRequest
-	GetCrcTokenResponse(GetTwitterWebhookRequest) GetTwitterWebhookResponse
-	PostAutoReplyResponse(PostTwitterWebhookRequest) PostTwitterWebhookResponse
+	GetCrcTokenResponse(GetTwitterWebhookRequest) (GetTwitterWebhookResponse, error)
+	PostAutoReplyResponse(PostTwitterWebhookRequest) (PostTwitterWebhookResponse, error)
 }
 
 type ReplyUseCaseImpl struct {
@@ -26,41 +25,37 @@ func NewReplyUseCaseImpl(rs domain.ReplyService) ReplyUseCase {
 	}
 }
 
-func (tu ReplyUseCaseImpl) NewGetTwitterWebhookRequest() GetTwitterWebhookRequest {
+func NewGetTwitterWebhookRequest() GetTwitterWebhookRequest {
 	return GetTwitterWebhookRequest{}
 }
 
 // TwitterのWebhookの認証に用いる
 // ref: https://developer.twitter.com/en/docs/accounts-and-users/subscribe-account-activity/guides/securing-webhooks
-func (tu ReplyUseCaseImpl) GetCrcTokenResponse(req GetTwitterWebhookRequest) GetTwitterWebhookResponse {
+func (tu ReplyUseCaseImpl) GetCrcTokenResponse(req GetTwitterWebhookRequest) (GetTwitterWebhookResponse, error) {
 	mac := hmac.New(sha256.New, []byte(os.Getenv("CONSUMER_SECRET")))
-	mac.Write([]byte(req.CrcToken))
+	_, err := mac.Write([]byte(req.CrcToken))
 	return GetTwitterWebhookResponse{
 		Token: "sha256=" + base64.StdEncoding.EncodeToString(mac.Sum(nil)),
-	}
+	}, err
 }
 
-func (tu ReplyUseCaseImpl) NewPostTwitterWebhookRequest() PostTwitterWebhookRequest {
+func NewPostTwitterWebhookRequest() PostTwitterWebhookRequest {
 	return PostTwitterWebhookRequest{}
 }
 
-func (tu ReplyUseCaseImpl) PostAutoReplyResponse(req PostTwitterWebhookRequest) PostTwitterWebhookResponse {
+func (tu ReplyUseCaseImpl) PostAutoReplyResponse(req PostTwitterWebhookRequest) (PostTwitterWebhookResponse, error) {
 	// リプライがない、もしくはユーザが不正な場合は空を返す
 	if len(req.TweetCreateEvents) < 1 || req.UserID == req.TweetCreateEvents[0].User.IDStr {
-		return PostTwitterWebhookResponse{}
+		return PostTwitterWebhookResponse{}, fmt.Errorf("error: not found reply or invalid user")
 	}
 	tweet := domain.Tweet{
 		ID:             req.TweetCreateEvents[0].TweetIDStr,
 		Text:           req.TweetCreateEvents[0].Text,
 		UserScreenName: req.TweetCreateEvents[0].User.ScreenName,
 	}
-
 	// リプライから全世界のスキー場の中で最も適切なスキー場を求める
 	sr, err := tu.ReplyService.ReplyForecast(&tweet)
-	if err != nil {
-		return PostTwitterWebhookResponse{}
-	}
-	return PostTwitterWebhookResponse{sr.Name}
+	return PostTwitterWebhookResponse{sr.Name}, err
 }
 
 type GetTwitterWebhookRequest struct {

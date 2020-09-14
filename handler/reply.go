@@ -23,20 +23,25 @@ func NewReplyHandlerImpl(replyUseCase usecase.ReplyUseCase) ReplyHandler {
 }
 
 func (th ReplyHandlerImpl) HandleTwitterGetCrcToken(ctx *gin.Context) {
-	req := th.ReplyUseCase.NewGetTwitterWebhookRequest()
+	req := usecase.NewGetTwitterWebhookRequest()
 	if err := ctx.Bind(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, err)
 	}
-	res := th.ReplyUseCase.GetCrcTokenResponse(req)
+	res, err := th.ReplyUseCase.GetCrcTokenResponse(req)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, err)
+	}
 	ctx.JSON(http.StatusOK, res)
 }
 
 func (th ReplyHandlerImpl) HandleTwitterPostWebhook(ctx *gin.Context) {
-	req := th.ReplyUseCase.NewPostTwitterWebhookRequest()
+	req := usecase.NewPostTwitterWebhookRequest()
 	if err := ctx.Bind(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, err)
 	}
-
-	res := th.ReplyUseCase.PostAutoReplyResponse(req)
+	res, err := th.ReplyUseCase.PostAutoReplyResponse(req)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, err)
+	}
 	ctx.JSON(http.StatusOK, res)
 }

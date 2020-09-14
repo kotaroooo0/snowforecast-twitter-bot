@@ -33,7 +33,7 @@ func setupBatch() error {
 }
 
 func setupRouter() (*gin.Engine, error) {
-	tc := twitter.NewTwitterConfig(os.Getenv("CONSUMER_KEY"), os.Getenv("CONSUMER_SECRET"), os.Getenv("ACCESS_TOKEN_KEY"), os.Getenv("ACCESS_TOKEN_SECRET"))
+	tc := twitter.NewConfig(os.Getenv("CONSUMER_KEY"), os.Getenv("CONSUMER_SECRET"), os.Getenv("ACCESS_TOKEN_KEY"), os.Getenv("ACCESS_TOKEN_SECRET"))
 	tac := twitter.NewApiClient(tc)
 	sac := snowforecast.NewApiClient()
 	ei, err := elasticsearch.NewSnowResortSearcherEsImpl()

@@ -1,6 +1,7 @@
 package snowforecast
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/PuerkitoBio/goquery"
@@ -72,6 +73,9 @@ func (sc ApiClient) GetForecastBySearchWord(searchWord string) (Forecast, error)
 		}
 	})
 
+	if len(snowfalls) == 0 || len(rainfalls) == 0 {
+		return Forecast{}, fmt.Errorf("error: can not get forecasts")
+	}
 	return NewForecast(snowfalls, rainfalls, searchWord), nil
 }
 

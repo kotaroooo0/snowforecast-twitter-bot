@@ -2,6 +2,7 @@ package domain
 
 import (
 	"fmt"
+	"log"
 	"net/url"
 	"strconv"
 	"strings"
@@ -74,14 +75,15 @@ func (r ReplyServiceImpl) ReplyForecast(tweet *Tweet) (*SnowResort, error) {
 
 	params := url.Values{}
 	params.Set("in_reply_to_status_id", tweet.ID)
-	_, err = r.TwitterApiClient.PostTweet(fmt.Sprintf("@%s %s", tweet.UserScreenName, content), params)
+	t, err := r.TwitterApiClient.PostTweet(fmt.Sprintf("@%s %s", tweet.UserScreenName, content), params)
 	if err != nil {
 		return &SnowResort{}, err
 	}
+	log.Println(t)
 	return sr, nil
 }
 
-func replyContent(name string, sf snowforecast.SnowfallForecast) (string, error) {
+func replyContent(name string, sf snowforecast.Forecast) (string, error) {
 	// TODO: 仮の文章
 	content := name + "\n"
 	content += "今日 | 明日 | 明後日\n"

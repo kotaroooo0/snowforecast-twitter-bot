@@ -1,4 +1,4 @@
-package elasticsearch
+package main
 
 import (
 	"fmt"
@@ -94,8 +94,8 @@ func parseStringToSnowResorts(str string) []domain.SnowResort {
 	snowResorts := []domain.SnowResort{}
 	for i := 1; i < len(stringSlice); i += 2 {
 		snowResorts = append(snowResorts, domain.SnowResort{
-			Name:      stringSlice[i-1],
-			SearchKey: stringSlice[i],
+			Name:      stringSlice[i],
+			SearchKey: stringSlice[i-1],
 		})
 	}
 	return snowResorts
