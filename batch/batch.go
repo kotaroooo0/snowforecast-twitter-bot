@@ -1,29 +1,43 @@
 package batch
 
 import (
+	"fmt"
 	"log"
 
-	"github.com/ChimeraCoder/anaconda"
 	"github.com/bamzi/jobrunner"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/text"
-	"github.com/robfig/cron/v3"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/twitter"
 )
 
-func TweetForecastJobSchedule(spec string, job cron.Job) error {
-	return jobrunner.Schedule(spec, job)
+type Pair struct {
+	First  string `yaml:"first"`
+	Second string `yaml:"second"`
+}
+
+func TweetForecastRun(api twitter.IApiClient, pairs []Pair) error {
+	jobrunner.Start()
+	for i, p := range pairs {
+		if p.First == "" || p.Second == "" {
+			return fmt.Errorf("error: two elements are needed")
+		}
+		if err := jobrunner.Schedule(fmt.Sprintf("00 %02d * * *", i), TweetForecast{api, p}); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 type TweetForecast struct {
-	Api        *anaconda.TwitterApi
-	SkiResort1 string
-	SkiResort2 string
+	Api         twitter.IApiClient
+	SnowResorts Pair
 }
 
 func (t TweetForecast) Run() {
-	text := text.TweetContent(t.SkiResort1, t.SkiResort2)
-	tweet, err := t.Api.PostTweet(text, nil)
+	text, err := text.TweetContent(t.SnowResorts)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-	log.Println(tweet)
+	if _, err := t.Api.PostTweet(text, nil); err != nil {
+		log.Fatal(err)
+	}
 }
