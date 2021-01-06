@@ -83,7 +83,7 @@ func (r ReplyServiceImpl) ReplyForecast(tweet *Tweet) (*SnowResort, error) {
 	return sr, nil
 }
 
-func replyContent(name string, sf snowforecast.Forecast) (string, error) {
+func replyContent(name string, sf *snowforecast.Forecast) (string, error) {
 	// TODO: 仮の文章
 	content := name + "\n"
 	content += "今日 | 明日 | 明後日\n"

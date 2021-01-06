@@ -8,7 +8,7 @@ import (
 )
 
 type IApiClient interface {
-	GetForecastBySearchWord(string) (Forecast, error)
+	GetForecastBySearchWord(string) (*Forecast, error)
 }
 
 type ApiClient struct{}
@@ -21,74 +21,73 @@ func NewApiClient() IApiClient {
 // 1.本日の朝からの予報が見れる時
 // 2.本日の昼からの予報が見れる時
 // 3.本日の夜からの予報が見れる時
-func (sc ApiClient) GetForecastBySearchWord(searchWord string) (Forecast, error) {
-	doc, err := goquery.NewDocument("https://ja.snow-forecast.com/resorts/" + searchWord + "/6day/top")
+func (sc ApiClient) GetForecastBySearchWord(searchWord string) (*Forecast, error) {
+	doc, err := goquery.NewDocument(fmt.Sprintf("https://ja.snow-forecast.com/resorts/%s/6day/top", searchWord))
 	if err != nil {
-		return Forecast{}, err
+		return nil, err
 	}
 
-	snowfalls := make([]Snow, 0)
+	var convertErrFlag bool
+	snows := make([]Snow, 0)
 	forecastTableSnow := doc.Find("td.forecast-table-snow__cell")
 	forecastTableSnow.Each(func(index int, s *goquery.Selection) {
 		if s.HasClass("day-end") {
-			if index == 0 {
-				// 朝と昼の情報が取得できない時
-				nightSnowfall := selectionToInt(s)
-				snowfalls = append(snowfalls, NewSnow(0, 0, nightSnowfall))
-			} else if index == 1 {
-				// 朝の情報が取得できない時
-				noonSnowfall := selectionToInt(forecastTableSnow.Eq(index - 1))
-				nightSnowfall := selectionToInt(s)
-				snowfalls = append(snowfalls, NewSnow(0, noonSnowfall, nightSnowfall))
-			} else {
-				// 朝昼晩の情報が取得できる時
-				morningSnowfall := selectionToInt(forecastTableSnow.Eq(index - 2))
-				noonSnowfall := selectionToInt(forecastTableSnow.Eq(index - 1))
-				nightSnowfall := selectionToInt(s)
-				snowfalls = append(snowfalls, NewSnow(morningSnowfall, noonSnowfall, nightSnowfall))
+			morning, noon := -1, -1
+			// 夜の情報は必ず取得できる
+			night := convertInt(s.Text(), &convertErrFlag)
+			// 昼の情報も取得できる時
+			if index > 0 {
+				noon = convertInt(forecastTableSnow.Eq(index-1).Text(), &convertErrFlag)
 			}
+			// 朝の情報も取得できる時
+			if index > 1 {
+				morning = convertInt(forecastTableSnow.Eq(index-2).Text(), &convertErrFlag)
+			}
+			snows = append(snows, NewSnow(morning, noon, night))
 		}
 	})
+	if convertErrFlag {
+		return nil, fmt.Errorf("error: convert error occur")
+	}
 
-	rainfalls := make([]Rain, 0)
+	rains := make([]Rain, 0)
 	forecastTableRain := doc.Find("td.forecast-table-rain__cell")
 	forecastTableRain.Each(func(index int, s *goquery.Selection) {
 		if s.HasClass("day-end") {
-			if index == 0 {
-				// 朝と昼の情報が取得できない時
-				nightRainfall := selectionToInt(s)
-				rainfalls = append(rainfalls, NewRain(0, 0, nightRainfall))
-			} else if index == 1 {
-				// 朝の情報が取得できない時
-				noonRainfall := selectionToInt(forecastTableRain.Eq(index - 1))
-				nightRainfall := selectionToInt(s)
-				rainfalls = append(rainfalls, NewRain(0, noonRainfall, nightRainfall))
-			} else {
-				// 朝昼晩の情報が取得できる時
-				morningRainfall := selectionToInt(forecastTableRain.Eq(index - 2))
-				noonRainfall := selectionToInt(forecastTableRain.Eq(index - 1))
-				nightRainfall := selectionToInt(s)
-				rainfalls = append(rainfalls, NewRain(morningRainfall, noonRainfall, nightRainfall))
+			morning, noon := -1, -1
+			// 夜の情報は必ず取得できる
+			night := convertInt(s.Text(), &convertErrFlag)
+			// 昼の情報も取得できる時
+			if index > 0 {
+				noon = convertInt(forecastTableRain.Eq(index-1).Text(), &convertErrFlag)
 			}
+			// 朝の情報も取得できる時
+			if index > 1 {
+				morning = convertInt(forecastTableRain.Eq(index-2).Text(), &convertErrFlag)
+			}
+			rains = append(rains, NewRain(morning, noon, night))
 		}
 	})
-
-	if len(snowfalls) == 0 || len(rainfalls) == 0 {
-		return Forecast{}, fmt.Errorf("error: can not get forecasts")
+	if convertErrFlag {
+		return nil, fmt.Errorf("error: convert error occur")
 	}
-	return NewForecast(snowfalls, rainfalls, searchWord), nil
+
+	if len(snows) == 0 || len(rains) == 0 {
+		return nil, fmt.Errorf("error: can not get forecasts")
+	}
+	return NewForecast(snows, rains, searchWord), nil
 }
 
-func selectionToInt(s *goquery.Selection) int {
-	fall := s.Text()
-	if fall == "-" {
-		fall = "0"
+// "-"の場合は特別に0を返すキャスト
+func convertInt(s string, convertErrFlag *bool) int {
+	if s == "-" {
+		return 0
 	}
-	fallInt, err := strconv.Atoi(fall)
+	ret, err := strconv.Atoi(s)
 	if err != nil {
-		panic(err)
+		*convertErrFlag = true
 	}
-	return fallInt
+	return ret
 }
 
 type Forecast struct {
@@ -97,8 +96,8 @@ type Forecast struct {
 	SkiResort string
 }
 
-func NewForecast(snows []Snow, rains []Rain, skiResort string) Forecast {
-	return Forecast{
+func NewForecast(snows []Snow, rains []Rain, skiResort string) *Forecast {
+	return &Forecast{
 		Snows:     snows,
 		Rains:     rains,
 		SkiResort: skiResort,

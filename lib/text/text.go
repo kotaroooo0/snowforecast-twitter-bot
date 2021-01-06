@@ -4,15 +4,19 @@ import (
 	"strconv"
 
 	"github.com/kotaroooo0/snowforecast-twitter-bot/batch"
-	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/scriping"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/snowforecast"
 )
 
-func TweetContent(pair batch.Pair) (string, error) {
-	firstData, err := scriping.GetSnowfallForecastBySkiResort(pair.First)
+type TweetContentCreater struct {
+	ApiClient snowforecast.IApiClient
+}
+
+func (c TweetContentCreater) TweetContent(pair batch.Pair) (string, error) {
+	firstData, err := c.ApiClient.GetForecastBySearchWord(pair.First)
 	if err != nil {
 		return "", err
 	}
-	secondData, err := scriping.GetSnowfallForecastBySkiResort(pair.Second)
+	secondData, err := c.ApiClient.GetForecastBySearchWord(pair.Second)
 	if err != nil {
 		return "", err
 	}
@@ -24,10 +28,10 @@ func TweetContent(pair batch.Pair) (string, error) {
 	return content, nil
 }
 
-func areaLineString(snowfallForecast *scriping.SnowfallForecast) string {
-	content := strconv.Itoa(snowfallForecast.Snowfalls[0].MorningSnowfall) + addRainyChar(snowfallForecast.Rainfalls[0].MorningRainfall) + ", " + strconv.Itoa(snowfallForecast.Snowfalls[0].NoonSnowfall) + addRainyChar(snowfallForecast.Rainfalls[0].NoonRainfall) + ", " + strconv.Itoa(snowfallForecast.Snowfalls[0].NightSnowfall) + addRainyChar(snowfallForecast.Rainfalls[0].NightRainfall) + "cm | "
-	content += strconv.Itoa(snowfallForecast.Snowfalls[1].MorningSnowfall) + addRainyChar(snowfallForecast.Rainfalls[1].MorningRainfall) + ", " + strconv.Itoa(snowfallForecast.Snowfalls[1].NoonSnowfall) + addRainyChar(snowfallForecast.Rainfalls[1].NoonRainfall) + ", " + strconv.Itoa(snowfallForecast.Snowfalls[1].NightSnowfall) + addRainyChar(snowfallForecast.Rainfalls[1].NightRainfall) + "cm | "
-	content += strconv.Itoa(snowfallForecast.Snowfalls[2].MorningSnowfall) + addRainyChar(snowfallForecast.Rainfalls[2].MorningRainfall) + ", " + strconv.Itoa(snowfallForecast.Snowfalls[2].NoonSnowfall) + addRainyChar(snowfallForecast.Rainfalls[2].NoonRainfall) + ", " + strconv.Itoa(snowfallForecast.Snowfalls[2].NightSnowfall) + addRainyChar(snowfallForecast.Rainfalls[2].NightRainfall) + "cm "
+func areaLineString(snowfallForecast *snowforecast.Forecast) string {
+	content := strconv.Itoa(snowfallForecast.Snows[0].Morning) + addRainyChar(snowfallForecast.Rains[0].Morning) + ", " + strconv.Itoa(snowfallForecast.Snows[0].Noon) + addRainyChar(snowfallForecast.Rains[0].Noon) + ", " + strconv.Itoa(snowfallForecast.Snows[0].Night) + addRainyChar(snowfallForecast.Rains[0].Night) + "cm | "
+	content += strconv.Itoa(snowfallForecast.Snows[1].Morning) + addRainyChar(snowfallForecast.Rains[1].Morning) + ", " + strconv.Itoa(snowfallForecast.Snows[1].Noon) + addRainyChar(snowfallForecast.Rains[1].Noon) + ", " + strconv.Itoa(snowfallForecast.Snows[1].Night) + addRainyChar(snowfallForecast.Rains[1].Night) + "cm | "
+	content += strconv.Itoa(snowfallForecast.Snows[2].Morning) + addRainyChar(snowfallForecast.Rains[2].Morning) + ", " + strconv.Itoa(snowfallForecast.Snows[2].Noon) + addRainyChar(snowfallForecast.Rains[2].Noon) + ", " + strconv.Itoa(snowfallForecast.Snows[2].Night) + addRainyChar(snowfallForecast.Rains[2].Night) + "cm "
 	return content
 }
 
