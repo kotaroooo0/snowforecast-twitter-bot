@@ -18,20 +18,20 @@ func TweetContent(pair batch.Pair) (string, error) {
 	}
 	content := "今日 | 明日 | 明後日 (朝,昼,夜)\n"
 	content += pair.First + "\n"
-	content += AreaLineString(firstData) + "\n"
+	content += areaLineString(firstData) + "\n"
 	content += pair.Second + "\n"
-	content += AreaLineString(secondData) + "\n"
+	content += areaLineString(secondData) + "\n"
 	return content, nil
 }
 
-func AreaLineString(snowfallForecast *scriping.SnowfallForecast) string {
-	content := strconv.Itoa(snowfallForecast.Snowfalls[0].MorningSnowfall) + AddRainyChar(snowfallForecast.Rainfalls[0].MorningRainfall) + ", " + strconv.Itoa(snowfallForecast.Snowfalls[0].NoonSnowfall) + AddRainyChar(snowfallForecast.Rainfalls[0].NoonRainfall) + ", " + strconv.Itoa(snowfallForecast.Snowfalls[0].NightSnowfall) + AddRainyChar(snowfallForecast.Rainfalls[0].NightRainfall) + "cm | "
-	content += strconv.Itoa(snowfallForecast.Snowfalls[1].MorningSnowfall) + AddRainyChar(snowfallForecast.Rainfalls[1].MorningRainfall) + ", " + strconv.Itoa(snowfallForecast.Snowfalls[1].NoonSnowfall) + AddRainyChar(snowfallForecast.Rainfalls[1].NoonRainfall) + ", " + strconv.Itoa(snowfallForecast.Snowfalls[1].NightSnowfall) + AddRainyChar(snowfallForecast.Rainfalls[1].NightRainfall) + "cm | "
-	content += strconv.Itoa(snowfallForecast.Snowfalls[2].MorningSnowfall) + AddRainyChar(snowfallForecast.Rainfalls[2].MorningRainfall) + ", " + strconv.Itoa(snowfallForecast.Snowfalls[2].NoonSnowfall) + AddRainyChar(snowfallForecast.Rainfalls[2].NoonRainfall) + ", " + strconv.Itoa(snowfallForecast.Snowfalls[2].NightSnowfall) + AddRainyChar(snowfallForecast.Rainfalls[2].NightRainfall) + "cm "
+func areaLineString(snowfallForecast *scriping.SnowfallForecast) string {
+	content := strconv.Itoa(snowfallForecast.Snowfalls[0].MorningSnowfall) + addRainyChar(snowfallForecast.Rainfalls[0].MorningRainfall) + ", " + strconv.Itoa(snowfallForecast.Snowfalls[0].NoonSnowfall) + addRainyChar(snowfallForecast.Rainfalls[0].NoonRainfall) + ", " + strconv.Itoa(snowfallForecast.Snowfalls[0].NightSnowfall) + addRainyChar(snowfallForecast.Rainfalls[0].NightRainfall) + "cm | "
+	content += strconv.Itoa(snowfallForecast.Snowfalls[1].MorningSnowfall) + addRainyChar(snowfallForecast.Rainfalls[1].MorningRainfall) + ", " + strconv.Itoa(snowfallForecast.Snowfalls[1].NoonSnowfall) + addRainyChar(snowfallForecast.Rainfalls[1].NoonRainfall) + ", " + strconv.Itoa(snowfallForecast.Snowfalls[1].NightSnowfall) + addRainyChar(snowfallForecast.Rainfalls[1].NightRainfall) + "cm | "
+	content += strconv.Itoa(snowfallForecast.Snowfalls[2].MorningSnowfall) + addRainyChar(snowfallForecast.Rainfalls[2].MorningRainfall) + ", " + strconv.Itoa(snowfallForecast.Snowfalls[2].NoonSnowfall) + addRainyChar(snowfallForecast.Rainfalls[2].NoonRainfall) + ", " + strconv.Itoa(snowfallForecast.Snowfalls[2].NightSnowfall) + addRainyChar(snowfallForecast.Rainfalls[2].NightRainfall) + "cm "
 	return content
 }
 
-func AddRainyChar(rainfall int) string {
+func addRainyChar(rainfall int) string {
 	if rainfall > 5 {
 		return "☔️"
 	}
