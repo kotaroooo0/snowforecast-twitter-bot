@@ -7,13 +7,13 @@ import (
 )
 
 type SnowfallForecast struct {
-	Snowfalls []*Snowfall
-	Rainfalls []*Rainfall
+	Snowfalls []Snowfall
+	Rainfalls []Rainfall
 	SkiResort string
 }
 
-func NewSnowfallForecast(snowfalls []*Snowfall, rainfalls []*Rainfall, skiResort string) *SnowfallForecast {
-	return &SnowfallForecast{
+func NewSnowfallForecast(snowfalls []Snowfall, rainfalls []Rainfall, skiResort string) SnowfallForecast {
+	return SnowfallForecast{
 		Snowfalls: snowfalls,
 		Rainfalls: rainfalls,
 		SkiResort: skiResort,
@@ -26,8 +26,8 @@ type Snowfall struct {
 	NightSnowfall   int
 }
 
-func NewSnowfall(morningSnowfall, noonSnowfall, nightSnowfall int) *Snowfall {
-	return &Snowfall{
+func NewSnowfall(morningSnowfall, noonSnowfall, nightSnowfall int) Snowfall {
+	return Snowfall{
 		MorningSnowfall: morningSnowfall,
 		NoonSnowfall:    noonSnowfall,
 		NightSnowfall:   nightSnowfall,
@@ -40,8 +40,8 @@ type Rainfall struct {
 	NightRainfall   int
 }
 
-func NewRainfall(morningRainfall, noonRainfall, nightRainfall int) *Rainfall {
-	return &Rainfall{
+func NewRainfall(morningRainfall, noonRainfall, nightRainfall int) Rainfall {
+	return Rainfall{
 		MorningRainfall: morningRainfall,
 		NoonRainfall:    noonRainfall,
 		NightRainfall:   nightRainfall,
@@ -52,13 +52,13 @@ func NewRainfall(morningRainfall, noonRainfall, nightRainfall int) *Rainfall {
 // 1.本日の朝からの予報が見れる時
 // 2.本日の昼からの予報が見れる時
 // 3.本日の夜からの予報が見れる時
-func GetSnowfallForecastBySkiResort(skiResort string) *SnowfallForecast {
+func GetSnowfallForecastBySkiResort(skiResort string) (SnowfallForecast, error) {
 	doc, err := goquery.NewDocument("https://ja.snow-forecast.com/resorts/" + skiResort + "/6day/top")
 	if err != nil {
 		panic(err)
 	}
 
-	snowfalls := make([]*Snowfall, 0)
+	snowfalls := make([]Snowfall, 0)
 	forecastTableSnow := doc.Find("td.forecast-table-snow__cell")
 	forecastTableSnow.Each(func(index int, s *goquery.Selection) {
 		if s.HasClass("day-end") {
@@ -81,7 +81,7 @@ func GetSnowfallForecastBySkiResort(skiResort string) *SnowfallForecast {
 		}
 	})
 
-	rainfalls := make([]*Rainfall, 0)
+	rainfalls := make([]Rainfall, 0)
 	forecastTableRain := doc.Find("td.forecast-table-rain__cell")
 	forecastTableRain.Each(func(index int, s *goquery.Selection) {
 		if s.HasClass("day-end") {
