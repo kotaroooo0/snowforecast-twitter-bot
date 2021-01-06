@@ -3,31 +3,25 @@ package text
 import (
 	"strconv"
 
+	"github.com/kotaroooo0/snowforecast-twitter-bot/batch"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/scriping"
 )
 
-func TweetContent(skiResort1, skiResort2 string) string {
-	toLabel := map[string]string{
-		"Niseko":                 "ニセコ",
-		"SapporoKokusai":         "札幌国際",
-		"Hakuba47":               "白馬47",
-		"MyokoSuginohara":        "赤倉",
-		"TashiroKaguraMitsumata": "かぐら",
-		"IshiuchiMaruyama":       "石打丸山",
-		"MarunumaKogen":          "丸沼高原",
-		"TakasuSnowPark":         "高鷲",
-		"BiwakoValley":           "琵琶湖バレイ",
+func TweetContent(pair batch.Pair) (string, error) {
+	firstData, err := scriping.GetSnowfallForecastBySkiResort(pair.First)
+	if err != nil {
+		return "", err
 	}
-
-	data1 := scriping.GetSnowfallForecastBySkiResort(skiResort1)
-	data2 := scriping.GetSnowfallForecastBySkiResort(skiResort2)
-
+	secondData, err := scriping.GetSnowfallForecastBySkiResort(pair.Second)
+	if err != nil {
+		return "", err
+	}
 	content := "今日 | 明日 | 明後日 (朝,昼,夜)\n"
-	content += toLabel[skiResort1] + "\n"
-	content += AreaLineString(data1) + "\n"
-	content += toLabel[skiResort2] + "\n"
-	content += AreaLineString(data2) + "\n"
-	return content
+	content += pair.First + "\n"
+	content += AreaLineString(firstData) + "\n"
+	content += pair.Second + "\n"
+	content += AreaLineString(secondData) + "\n"
+	return content, nil
 }
 
 func AreaLineString(snowfallForecast *scriping.SnowfallForecast) string {
@@ -40,7 +34,8 @@ func AreaLineString(snowfallForecast *scriping.SnowfallForecast) string {
 func AddRainyChar(rainfall int) string {
 	if rainfall > 5 {
 		return "☔️"
-	} else if rainfall > 0 {
+	}
+	if rainfall > 0 {
 		return "☂️"
 	}
 	return ""
