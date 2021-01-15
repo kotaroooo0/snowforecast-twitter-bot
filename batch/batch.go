@@ -6,13 +6,20 @@ import (
 	"strconv"
 
 	"github.com/bamzi/jobrunner"
-	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/snowforecast"
-	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/twitter"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/apiclient/snowforecast"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/apiclient/twitter"
 )
 
 type Pair struct {
 	First  string `yaml:"first"`
 	Second string `yaml:"second"`
+}
+
+func NewPair(first, second string) Pair {
+	return Pair{
+		First:  first,
+		Second: second,
+	}
 }
 
 func TweetForecastRun(api twitter.IApiClient, pairs []Pair) error {
@@ -21,7 +28,7 @@ func TweetForecastRun(api twitter.IApiClient, pairs []Pair) error {
 		if p.First == "" || p.Second == "" {
 			return fmt.Errorf("error: two elements are needed")
 		}
-		if err := jobrunner.Schedule(fmt.Sprintf("00 %02d * * *", i), TweetForecast{api, p}); err != nil {
+		if err := jobrunner.Schedule(fmt.Sprintf("%02d 1 * * *", i*10%60), TweetForecast{api, p}); err != nil {
 			return err
 		}
 	}
@@ -34,7 +41,8 @@ type TweetForecast struct {
 }
 
 func (t TweetForecast) Run() {
-	tweetContentCreater := NewTweetContentCreater()
+	apiClient := snowforecast.NewApiClient()
+	tweetContentCreater := NewTweetContentCreater(apiClient)
 	text, err := tweetContentCreater.TweetContent(t.SnowResorts)
 	if err != nil {
 		log.Fatal(err)
@@ -45,21 +53,21 @@ func (t TweetForecast) Run() {
 }
 
 type TweetContentCreater struct {
-	ApiClient snowforecast.IApiClient
+	snowForecastApiClient snowforecast.IApiClient
 }
 
-func NewTweetContentCreater() TweetContentCreater {
+func NewTweetContentCreater(snowForecastApiClient snowforecast.IApiClient) TweetContentCreater {
 	return TweetContentCreater{
-		ApiClient: snowforecast.NewApiClient(),
+		snowForecastApiClient: snowForecastApiClient,
 	}
 }
 
 func (c TweetContentCreater) TweetContent(pair Pair) (string, error) {
-	firstData, err := c.ApiClient.GetForecastBySearchWord(pair.First)
+	firstData, err := c.snowForecastApiClient.GetForecastBySearchWord(pair.First)
 	if err != nil {
 		return "", err
 	}
-	secondData, err := c.ApiClient.GetForecastBySearchWord(pair.Second)
+	secondData, err := c.snowForecastApiClient.GetForecastBySearchWord(pair.Second)
 	if err != nil {
 		return "", err
 	}
