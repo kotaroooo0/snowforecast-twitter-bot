@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/snowforecast"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/apiclient/snowforecast"
 	"golang.org/x/exp/utf8string"
 
-	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/twitter"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/apiclient/twitter"
 )
 
 type SnowResort struct {

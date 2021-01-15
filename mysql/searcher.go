@@ -7,8 +7,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/kotaroooo0/gojaconv/jaconv"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/apiclient/yahoo"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/domain"
-	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/yahoo"
 	"github.com/texttheater/golang-levenshtein/levenshtein"
 )
 

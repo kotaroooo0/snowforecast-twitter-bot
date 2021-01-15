@@ -8,12 +8,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/apiclient/snowforecast"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/apiclient/twitter"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/batch"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/domain"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/elasticsearch"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/handler"
-	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/snowforecast"
-	"github.com/kotaroooo0/snowforecast-twitter-bot/lib/twitter"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/usecase"
 	"gopkg.in/yaml.v2"
 )
