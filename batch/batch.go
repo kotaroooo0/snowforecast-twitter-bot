@@ -28,7 +28,7 @@ func TweetForecastRun(api twitter.IApiClient, pairs []Pair) error {
 		if p.First == "" || p.Second == "" {
 			return fmt.Errorf("error: two elements are needed")
 		}
-		if err := jobrunner.Schedule(fmt.Sprintf("%02d 1 * * *", i*10%60), TweetForecast{api, p}); err != nil {
+		if err := jobrunner.Schedule(fmt.Sprintf("00 %2d * * *", i+7), TweetForecast{api, p}); err != nil {
 			return err
 		}
 	}
