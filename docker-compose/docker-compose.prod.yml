@@ -3,8 +3,8 @@ version: "3"
 services:
   app:
     build: ..
-    depends_on:
-        - elasticsearch
+    links:
+      - elasticsearch
   elasticsearch:
     build:
       context: ./elasticsearch
@@ -19,7 +19,7 @@ services:
     build: ./nginx
     ports:
       - "8000:8000"
-    depends_on:
+    links:
       - app
   https-portal:
     image: steveltn/https-portal:1
@@ -33,5 +33,5 @@ services:
       FORCE_RENEW: 'false'
     volumes:
       - /data/ssl_certs:/var/lib/https-portal
-    depends_on:
+    links:
       - nginx
