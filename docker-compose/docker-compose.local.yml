@@ -1,6 +1,12 @@
 version: "3.6"
 
 services:
+  # redis:
+  #   image: redis:6.0.5-alpine
+  #   volumes:
+  #     - ../redis:/data
+  #   ports:
+  #     - 6379:6379
   elasticsearch:
     build:
       context: ./elasticsearch
