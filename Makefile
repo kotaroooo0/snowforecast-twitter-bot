@@ -44,9 +44,9 @@ local:
 	docker-compose -f docker-compose/docker-compose.local.yml up -d
 	sh docker-compose/elasticsearch/setup.sh
 
-## docker-compose up for produciton
-.PHONY: produciton
-produciton:
+## docker-compose up for production
+.PHONY: production
+production:
 	docker-compose -f docker-compose/docker-compose.prod.yml up -d
 	sh docker-compose/elasticsearch/setup.sh
 
