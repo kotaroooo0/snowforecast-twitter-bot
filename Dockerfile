@@ -12,6 +12,7 @@ FROM alpine:latest
 
 COPY --from=builder /go/src/github.com/kotaroooo0/snowforecast-twitter-bot/app/main /main
 COPY .env /
+COPY batch.snow_resorts.yaml /
 
 EXPOSE 3000
 
