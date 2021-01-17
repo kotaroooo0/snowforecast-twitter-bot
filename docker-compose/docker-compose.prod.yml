@@ -28,7 +28,7 @@ services:
       - 443:443
     restart: always
     environment:
-      DOMAINS:  'snowfall.gq -> http://nginx:8000'
+      DOMAINS: '${URL} -> http://nginx:8000'
       STAGE: "production"
       FORCE_RENEW: 'false'
     volumes:
