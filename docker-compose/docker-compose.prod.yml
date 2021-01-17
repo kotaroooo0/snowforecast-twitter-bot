@@ -5,10 +5,6 @@ services:
     build: ..
     depends_on:
         - elasticsearch
-  # redis:
-  #   image: redis:6.0.5-alpine
-  #   volumes:
-  #     - ../db:/data
   elasticsearch:
     build:
       context: ./elasticsearch

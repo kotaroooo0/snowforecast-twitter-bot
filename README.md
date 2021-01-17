@@ -45,7 +45,6 @@ CONSUMER_KEY=<your twitter app's consumer key>
 CONSUMER_SECRET=<your twitter app's consumer secret>
 ACCESS_TOKEN_KEY=<your account's access token>
 ACCESS_TOKEN_SECRET=<your account's access secret>
-REDIS_HOST=redis
 ```
 
 ## Command for Develop
@@ -53,26 +52,7 @@ REDIS_HOST=redis
 You can use Makefile.
 
 ```
-# Hot Reload
-# ref: https://github.com/oxequa/realize
-$ realize start
-
-# Test
-# ref: https://github.com/eaburns/Watch
-# ref: https://github.com/izumin5210/cgt
-$ Watch -t make test | cgt
-
-# Redis
-# Setup Server(Backup: /usr/local/var/db/redis/dump.rdb)
-$ redis-server /usr/local/etc/redis.conf
-
-# Initial Data
-# 1 is Test DB
-$ cat data.txt | redis-cli --pipe
-$ cat data.txt | redis-cli -n 1 --pipe
-
-# Delete Selected DB
-redis-cli) flushdb
+WIP
 ```
 
 ## Author
