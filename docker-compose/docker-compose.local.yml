@@ -6,8 +6,6 @@ services:
       context: ./elasticsearch
     environment:
       - discovery.type=single-node
-    volumes:
-      - ../elasticsearch:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
       - 9300:9300
