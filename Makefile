@@ -52,10 +52,16 @@ clean:
 	go clean
 	rm -f main
 
+.PHONY: local
+local:
+	docker-compose -f docker-compose/docker-compose.local.yml up -d
+	sh docker-compose/elasticsearch/setup.sh
+
 ## docker-compose up for produciton
 .PHONY: produciton
-up:
-	docker-compose -f docker-compose/docker-compose.prod.yml up
+produciton:
+	docker-compose -f docker-compose/docker-compose.prod.yml up -d
+	sh docker-compose/elasticsearch/setup.sh
 
 ## Show help
 .PHONY: help

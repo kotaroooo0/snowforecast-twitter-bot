@@ -6,13 +6,14 @@ import (
 	"log"
 	"os"
 
+	"github.com/kotaroooo0/snowforecast-twitter-bot/searcher/es"
+
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/apiclient/snowforecast"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/apiclient/twitter"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/batch"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/domain"
-	"github.com/kotaroooo0/snowforecast-twitter-bot/elasticsearch"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/handler"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/usecase"
 	"gopkg.in/yaml.v2"
@@ -33,7 +34,7 @@ func targetsLoad() ([]batch.Pair, error) {
 	if err != nil {
 		return ps, fmt.Errorf("error: loading batch.snow_resorts.yaml file")
 	}
-	file.Close()
+	defer file.Close()
 	body, err := ioutil.ReadAll(file)
 	if err != nil {
 		return ps, err
@@ -57,7 +58,7 @@ func setupRouter() (*gin.Engine, error) {
 	tc := twitter.NewConfig(os.Getenv("CONSUMER_KEY"), os.Getenv("CONSUMER_SECRET"), os.Getenv("ACCESS_TOKEN_KEY"), os.Getenv("ACCESS_TOKEN_SECRET"))
 	tac := twitter.NewApiClient(tc)
 	sac := snowforecast.NewApiClient()
-	ei, err := elasticsearch.NewSnowResortSearcherEsImpl()
+	ei, err := es.NewSnowResortSearcherEsImpl()
 	if err != nil {
 		return nil, err
 	}

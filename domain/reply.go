@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/kotaroooo0/snowforecast-twitter-bot/searcher"
+
 	"github.com/kotaroooo0/snowforecast-twitter-bot/apiclient/snowforecast"
 	"golang.org/x/exp/utf8string"
 
@@ -16,10 +18,6 @@ import (
 type SnowResort struct {
 	Name      string `db:"name" json:"name"`
 	SearchKey string `db:"search_key" json:"search_key"`
-}
-
-type SnowResortSearcher interface {
-	FindSimilarSnowResort(string) (*SnowResort, error)
 }
 
 type SnowResortRepository interface {
@@ -38,14 +36,14 @@ type ReplyService interface {
 
 type ReplyServiceImpl struct {
 	// ドメイン層は他の層にも依存しない
-	SnowResortSearcher    SnowResortSearcher
+	SnowResortSearcher    searcher.Searchr
 	TwitterApiClient      twitter.IApiClient
 	SnowforecastApiClient snowforecast.IApiClient
 }
 
-func NewReplyServiceImpl(snowResortSearcher SnowResortSearcher, twitterApiClient twitter.IApiClient, snowforecastApiClient snowforecast.IApiClient) ReplyService {
+func NewReplyServiceImpl(searcher searcher.Searchr, twitterApiClient twitter.IApiClient, snowforecastApiClient snowforecast.IApiClient) ReplyService {
 	return &ReplyServiceImpl{
-		SnowResortSearcher:    snowResortSearcher,
+		SnowResortSearcher:    searcher,
 		TwitterApiClient:      twitterApiClient,
 		SnowforecastApiClient: snowforecastApiClient,
 	}
@@ -58,10 +56,12 @@ func (r ReplyServiceImpl) ReplyForecast(tweet *Tweet) (*SnowResort, error) {
 	// @snowfall_botを消す
 	replyText = strings.Replace(replyText, "@snowfall_bot ", "", -1)
 
-	sr, err := r.SnowResortSearcher.FindSimilarSnowResort(replyText)
+	dto, err := r.SnowResortSearcher.FindSimilarSnowResort(replyText)
 	if err != nil {
-		return &SnowResort{}, err
+		return nil, err
 	}
+
+	sr := toSnowResort(dto)
 
 	sf, err := r.SnowforecastApiClient.GetForecastBySearchWord(sr.SearchKey)
 	if err != nil {
@@ -109,4 +109,11 @@ func addRainyChar(rainfall int) string {
 		return "☂️"
 	}
 	return ""
+}
+
+func toSnowResort(dto *searcher.SnowResortDto) *SnowResort {
+	return &SnowResort{
+		Name:      dto.Name,
+		SearchKey: dto.SearchKey,
+	}
 }

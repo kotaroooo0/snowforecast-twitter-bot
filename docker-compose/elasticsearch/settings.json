@@ -3,9 +3,14 @@
     "analysis": {
       "analyzer": {
         "romaji_analyzer": {
-          "char_filter": ["icu_normalizer"],
+          "char_filter": [
+            "icu_normalizer"
+          ],
           "tokenizer": "kuromoji_tokenizer",
-          "filter": ["romaji_readingform", "engram"]
+          "filter": [
+            "romaji_readingform",
+            "engram"
+          ]
         }
       },
       "filter": {
