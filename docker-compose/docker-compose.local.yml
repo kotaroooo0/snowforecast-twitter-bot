@@ -9,7 +9,7 @@ services:
   #     - 6379:6379
   elasticsearch:
     build:
-      context: ../elasticsearch
+      context: ./elasticsearch
     environment:
       - discovery.type=single-node
     volumes:

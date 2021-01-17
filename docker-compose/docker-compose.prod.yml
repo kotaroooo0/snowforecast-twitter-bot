@@ -11,7 +11,7 @@ services:
   #     - ../db:/data
   elasticsearch:
     build:
-      context: ../elasticsearch
+      context: ./elasticsearch
     environment:
       - discovery.type=single-node
     volumes:

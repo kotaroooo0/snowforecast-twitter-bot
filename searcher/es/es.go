@@ -1,4 +1,4 @@
-package elasticsearch
+package es
 
 import (
 	"context"
@@ -6,31 +6,31 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/kotaroooo0/snowforecast-twitter-bot/domain"
+	"github.com/kotaroooo0/snowforecast-twitter-bot/searcher"
 	"github.com/olivere/elastic/v7"
 )
-
-type SnowResortSearcherEsImpl struct {
-	Client *elastic.Client
-}
 
 var (
 	targetIndex = "snow_resorts_alias"
 	targetField = []string{"name", "search_key"}
 )
 
-func NewSnowResortSearcherEsImpl() (SnowResortSearcherEsImpl, error) {
-	// https://github.com/olivere/elastic/wiki/Docker
+type SearcherEsImpl struct {
+	Client *elastic.Client
+}
+
+func NewSnowResortSearcherEsImpl() (*SearcherEsImpl, error) {
+	// ref: https://github.com/olivere/elastic/wiki/Docker
 	client, err := elastic.NewClient(elastic.SetSniff(false))
 	if err != nil {
-		return SnowResortSearcherEsImpl{}, err
+		return nil, err
 	}
-	return SnowResortSearcherEsImpl{
+	return &SearcherEsImpl{
 		Client: client,
 	}, nil
 }
 
-func (s SnowResortSearcherEsImpl) FindSimilarSnowResort(source string) (*domain.SnowResort, error) {
+func (s *SearcherEsImpl) FindSimilarSnowResort(source string) (*searcher.SnowResortDto, error) {
 	multiMatchQuery := elastic.NewMultiMatchQuery(source, targetField...).Type("most_fields")
 	res, err := s.Client.Search().Index(targetIndex).Query(multiMatchQuery).Size(1).Do(context.Background())
 	if err != nil {
@@ -40,7 +40,7 @@ func (s SnowResortSearcherEsImpl) FindSimilarSnowResort(source string) (*domain.
 		return nil, fmt.Errorf("error: document not found")
 	}
 
-	var sr domain.SnowResort
+	var sr searcher.SnowResortDto
 	if err = json.Unmarshal(res.Hits.Hits[0].Source, &sr); err != nil {
 		log.Println(err)
 	}

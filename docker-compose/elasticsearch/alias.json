@@ -1,0 +1,5 @@
+{
+    "actions" : [
+      { "add" : { "index" : "snow_resorts_v1", "alias" : "snow_resorts_alias" } }
+    ]
+  }
