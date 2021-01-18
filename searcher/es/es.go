@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/kotaroooo0/snowforecast-twitter-bot/searcher"
 	"github.com/olivere/elastic/v7"
@@ -21,7 +22,7 @@ type SearcherEsImpl struct {
 
 func NewSnowResortSearcherEsImpl() (*SearcherEsImpl, error) {
 	// ref: https://github.com/olivere/elastic/wiki/Docker
-	client, err := elastic.NewClient(elastic.SetSniff(false))
+	client, err := elastic.NewClient(elastic.SetURL(os.Getenv("ELASTICSEARCH_URL")), elastic.SetSniff(false))
 	if err != nil {
 		return nil, err
 	}
