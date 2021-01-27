@@ -13,6 +13,7 @@ services:
     build: ..
     links:
       - elasticsearch
+    command: ["./wait-for-it.sh", "./main"]
   nginx:
     build: ./nginx
     ports:

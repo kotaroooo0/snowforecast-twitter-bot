@@ -10,10 +10,12 @@ RUN go build -o main
 
 FROM alpine:latest
 
-COPY --from=builder /go/src/github.com/kotaroooo0/snowforecast-twitter-bot/app/main /main
 COPY .env /
 COPY batch.snow_resorts.yaml /
+COPY wait-for-it.sh /
+RUN chmod 777 ./wait-for-it.sh
 
+COPY --from=builder /go/src/github.com/kotaroooo0/snowforecast-twitter-bot/app/main /
 EXPOSE 3000
 
-ENTRYPOINT ["/main"]
+CMD ["./main"]
