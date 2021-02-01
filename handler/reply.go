@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/k0kubun/pp"
 	"github.com/kotaroooo0/snowforecast-twitter-bot/usecase"
 )
 
@@ -39,8 +40,10 @@ func (th ReplyHandlerImpl) HandleTwitterPostWebhook(ctx *gin.Context) {
 	if err := ctx.Bind(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, err)
 	}
+	pp.Println(req)
 	res, err := th.ReplyUseCase.PostAutoReplyResponse(req)
 	if err != nil {
+		pp.Println(err)
 		ctx.JSON(http.StatusInternalServerError, err)
 	}
 	ctx.JSON(http.StatusOK, res)
