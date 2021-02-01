@@ -45,6 +45,7 @@ func (th ReplyHandlerImpl) HandleTwitterPostWebhook(ctx *gin.Context) {
 	if err != nil {
 		pp.Println(err)
 		ctx.JSON(http.StatusInternalServerError, err)
+		ctx.Status(500)
 	}
 	ctx.JSON(http.StatusOK, res)
 }

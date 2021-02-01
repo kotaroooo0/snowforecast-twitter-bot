@@ -45,8 +45,10 @@ func NewPostTwitterWebhookRequest() PostTwitterWebhookRequest {
 }
 
 func (tu ReplyUseCaseImpl) PostAutoReplyResponse(req PostTwitterWebhookRequest) (PostTwitterWebhookResponse, error) {
-	pp.Println(req)
 	// リプライがない、もしくはユーザが不正な場合は空を返す
+	pp.Println(len(req.TweetCreateEvents))
+	pp.Println(req.UserID)
+	pp.Println(req.TweetCreateEvents[0].User.IDStr)
 	if len(req.TweetCreateEvents) < 1 || req.UserID == req.TweetCreateEvents[0].User.IDStr {
 		return PostTwitterWebhookResponse{}, fmt.Errorf("error: not found reply or invalid user")
 	}
